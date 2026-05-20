@@ -839,11 +839,11 @@ Please renew your tax soon.
 
     return (
 
-        <div>
+        <div className="p-8 bg-gray-100 min-h-screen">
 
             {/* NAVBAR */}
 
-            <div className="navbar">
+            <div className="flex justify-between items-center bg-black text-white p-5 rounded-2xl mb-8">
 
                 <h2>
                     🚗 MV Tax Dashboard
@@ -894,11 +894,7 @@ Please renew your tax soon.
                 </CSVLink>
 
             </div>
-            <div
-                className="table-container"
-                style={{ marginBottom: "20px" }}
-            >
-
+            <div className="bg-white rounded-3xl shadow-lg p-6 mb-8">
                 <h2>Add Vehicle</h2>
 
                 <input
@@ -1020,312 +1016,329 @@ Please renew your tax soon.
 
             </div>
 
-            <div className="container">
-                <input
 
-                    type="text"
+            <input
+                type="text"
+                placeholder="Search vehicle or owner"
+                value={search}
+                onChange={(e) =>
+                    setSearch(e.target.value)
+                }
+                className="w-full p-4 rounded-2xl border border-gray-300 shadow-sm outline-none focus:ring-2 focus:ring-blue-500 mb-8"
+            />
 
-                    placeholder=
-                    "Search vehicle or owner"
+            {/* ANALYTICS */}
 
-                    value={search}
+            <div className="grid grid-cols-4 gap-6">
 
-                    onChange={(e) =>
-                        setSearch(e.target.value)
-                    }
+                <div className="bg-blue-500 text-white p-6 rounded-2xl shadow-lg">
 
-                />
-
-                {/* ANALYTICS */}
-
-                <div className="cards">
-
-                    <div className="card blue">
-
-                        {vehicles.length}
-
-                        <br />
-
+                    <h2 className="text-xl font-bold">
                         Total Vehicles
+                    </h2>
 
-                    </div>
-
-                    <div className="card red">
-
-                        {expired.length}
-
-                        <br />
-
-                        Expired
-
-                    </div>
-
-                    <div className="card orange">
-
-                        {expiring.length}
-
-                        <br />
-
-                        Expiring
-
-                    </div>
-
-                    <div className="card green">
-
-                        {active.length}
-
-                        <br />
-
-                        Active
-
-                    </div>
+                    <p className="text-4xl font-bold mt-4">
+                        {vehicles.length}
+                    </p>
 
                 </div>
 
-                {/* TABLE */}
+                <div className="bg-red-500 text-white p-6 rounded-2xl shadow-lg">
 
-                <div className="table-container">
-
-                    <h2>
-                        Vehicle Records
+                    <h2 className="text-xl font-bold">
+                        Expired
                     </h2>
 
-                    <table>
+                    <p className="text-4xl font-bold mt-4">
+                        {expired.length}
+                    </p>
 
-                        <thead>
+                </div>
 
+                <div className="bg-orange-500 text-white p-6 rounded-2xl shadow-lg">
 
+                    <h2 className="text-xl font-bold">
+                        Expiring
+                    </h2>
 
-                            <tr>
+                    <p className="text-4xl font-bold mt-4">
+                        {expiring.length}
+                    </p>
 
-                                <th>ID</th>
-                                <th>Vehicle</th>
-                                <th>Expiry</th>
-                                <th>Phone</th>
-                                <th>Owner</th>
-                                <th>
-                                    VAHAN Owner
-                                </th>
-                                <th>Status</th>
-                                <th>Actions</th>
+                </div>
 
-                            </tr>
+                <div className="bg-green-500 text-white p-6 rounded-2xl shadow-lg">
 
-                        </thead>
+                    <h2 className="text-xl font-bold">
+                        Active
+                    </h2>
 
-                        <tbody>
+                    <p className="text-4xl font-bold mt-4">
+                        {active.length}
+                    </p>
 
-                            {filteredVehicles.map((vehicle) => (
+                </div>
 
-                                <tr key={vehicle.id}>
+            </div>
 
-                                    <td>{vehicle.id}</td>
+            {/* TABLE */}
 
-                                    <td>
-                                        {vehicle.vehicle_number}
-                                    </td>
+            <div className="bg-white rounded-3xl shadow-lg p-6 mt-10 overflow-x-auto">
 
-                                    <td>
-                                        {vehicle.expiry_date}
-                                    </td>
+                <h2>
+                    Vehicle Records
+                </h2>
 
-                                    <td>{vehicle.phone}</td>
+                <table>
 
-                                    <td>{vehicle.owner}</td>
-                                    <td>
-                                        {
-                                            vehicle.vahan_owner_name
-                                            || "-"
-                                        }
-                                    </td>
-                                    <td>
-
-                                        {
-
-                                            (() => {
-
-                                                const today =
-                                                    new Date();
-
-                                                const expiry =
-                                                    new Date(
-                                                        vehicle.expiry_date
-                                                    );
-
-                                                const diff =
-                                                    (expiry - today) /
-                                                    (1000 * 60 * 60 * 24);
-
-                                                if (diff < 0) {
-
-                                                    return (
-
-                                                        <span
-                                                            style={{
-                                                                color: "red",
-                                                                fontWeight: "bold"
-                                                            }}
-                                                        >
-
-                                                            Expired
-
-                                                        </span>
-                                                    );
-                                                }
-
-                                                else if (diff <= 7) {
-
-                                                    return (
-
-                                                        <span
-                                                            style={{
-                                                                color: "orange",
-                                                                fontWeight: "bold"
-                                                            }}
-                                                        >
-
-                                                            Expiring
-
-                                                        </span>
-                                                    );
-                                                }
-
-                                                else {
-
-                                                    return (
-
-                                                        <span
-                                                            style={{
-                                                                color: "green",
-                                                                fontWeight: "bold"
-                                                            }}
-                                                        >
-
-                                                            Active
-
-                                                        </span>
-                                                    );
-                                                }
-                                            })()
-                                        }
-
-                                    </td>
-
-                                    <td>
+                    <thead>
 
 
-                                        {
-                                            role !== "viewer" && (
 
-                                                <button
-                                                    onClick={() =>
-                                                        startEdit(vehicle)
-                                                    }
-                                                >
-                                                    Edit
-                                                </button>
+                        <tr>
 
-                                            )
-                                        }
+                            <th>ID</th>
+                            <th>Vehicle</th>
+                            <th>Expiry</th>
+                            <th>Phone</th>
+                            <th>Owner</th>
+                            <th>
+                                VAHAN Owner
+                            </th>
+                            <th>Status</th>
+                            <th>Actions</th>
 
-                                        <button
+                        </tr>
 
-                                            onClick={() =>
-                                                sendWhatsApp(vehicle)
+                    </thead>
+
+                    <tbody>
+
+                        {filteredVehicles.map((vehicle) => (
+
+                            <tr key={vehicle.id}>
+
+                                <td>{vehicle.id}</td>
+
+                                <td>
+                                    {vehicle.vehicle_number}
+                                </td>
+
+                                <td>
+                                    {vehicle.expiry_date}
+                                </td>
+
+                                <td>{vehicle.phone}</td>
+
+                                <td>{vehicle.owner}</td>
+                                <td>
+                                    {
+                                        vehicle.vahan_owner_name
+                                        || "-"
+                                    }
+                                </td>
+                                <td>
+
+                                    {
+
+                                        (() => {
+
+                                            const today =
+                                                new Date();
+
+                                            const expiry =
+                                                new Date(
+                                                    vehicle.expiry_date
+                                                );
+
+                                            const diff =
+                                                (expiry - today) /
+                                                (1000 * 60 * 60 * 24);
+
+                                            if (diff < 0) {
+
+                                                return (
+
+                                                    <span
+                                                        style={{
+                                                            color: "red",
+                                                            fontWeight: "bold"
+                                                        }}
+                                                    >
+
+                                                        Expired
+
+                                                    </span>
+                                                );
                                             }
 
-                                            style={{
-                                                background: "green",
-                                                marginRight: "10px"
-                                            }}
-                                        >
+                                            else if (diff <= 7) {
 
-                                            WhatsApp
+                                                return (
 
-                                        </button>
-                                        <button
+                                                    <span
+                                                        style={{
+                                                            color: "orange",
+                                                            fontWeight: "bold"
+                                                        }}
+                                                    >
 
-                                            onClick={() =>
-                                                viewHistory(vehicle.id)
+                                                        Expiring
+
+                                                    </span>
+                                                );
                                             }
 
-                                            style={{
-                                                background: "blue",
-                                                marginRight: "10px"
-                                            }}
-                                        >
+                                            else {
 
-                                            History
+                                                return (
 
-                                        </button>
-                                        {
-                                            role !== "viewer" && (
+                                                    <span
+                                                        style={{
+                                                            color: "green",
+                                                            fontWeight: "bold"
+                                                        }}
+                                                    >
 
-                                                <button
+                                                        Active
 
-                                                    disabled={fetching}
+                                                    </span>
+                                                );
+                                            }
+                                        })()
+                                    }
 
-                                                    onClick={async () => {
+                                </td>
 
-                                                        setFetching(true);
+                                <td>
 
-                                                        try {
 
-                                                            const token =
-                                                                localStorage.getItem(
-                                                                    "token"
-                                                                );
+                                    {
+                                        role !== "viewer" && (
 
-                                                            await axios.get(
+                                            <button
+                                                onClick={() =>
+                                                    startEdit(vehicle)
+                                                }
+                                                className="
+        bg-blue-500
+        hover:bg-blue-600
+        text-white
+        px-4
+        py-2
+        rounded-xl
+        mr-2
+    "
+                                            >
+                                                Edit
+                                            </button>
 
-                                                                `http://127.0.0.1:5000/api/fetch_vehicle_info/${vehicle.vehicle_number}`,
+                                        )
+                                    }
 
-                                                                {
+                                    <button
 
-                                                                    headers: {
+                                        onClick={() =>
+                                            sendWhatsApp(vehicle)
+                                        }
 
-                                                                        Authorization:
-                                                                            `Bearer ${token}`
+                                        className="
+    bg-green-500
+    hover:bg-green-600
+    text-white
+    px-4
+    py-2
+    rounded-xl
+    mr-2
+"
+                                    >
 
-                                                                    }
+                                        WhatsApp
+
+                                    </button>
+                                    <button
+
+                                        onClick={() =>
+                                            viewHistory(vehicle.id)
+                                        }
+
+                                        style={{
+                                            background: "blue",
+                                            marginRight: "10px"
+                                        }}
+                                    >
+
+                                        History
+
+                                    </button>
+                                    {
+                                        role !== "viewer" && (
+
+                                            <button
+
+                                                disabled={fetching}
+
+                                                onClick={async () => {
+
+                                                    setFetching(true);
+
+                                                    try {
+
+                                                        const token =
+                                                            localStorage.getItem(
+                                                                "token"
+                                                            );
+
+                                                        await axios.get(
+
+                                                            `http://127.0.0.1:5000/api/fetch_vehicle_info/${vehicle.vehicle_number}`,
+
+                                                            {
+
+                                                                headers: {
+
+                                                                    Authorization:
+                                                                        `Bearer ${token}`
 
                                                                 }
 
-                                                            );
+                                                            }
 
-                                                            await fetchVehicles();
+                                                        );
 
-                                                        } catch (err) {
+                                                        await fetchVehicles();
 
-                                                            console.log(err);
+                                                    } catch (err) {
 
-                                                        }
+                                                        console.log(err);
 
-                                                        setFetching(false);
-
-                                                    }}
-
-                                                >
-
-                                                    {
-                                                        fetching
-                                                            ? "Fetching..."
-                                                            : "Fetch Info"
                                                     }
 
-                                                </button>
+                                                    setFetching(false);
 
-                                            )
+                                                }}
+
+                                            >
+
+                                                {
+                                                    fetching
+                                                        ? "Fetching..."
+                                                        : "Fetch Info"
+                                                }
+
+                                            </button>
+
+                                        )
+                                    }
+
+                                    {/*vehicle info*/}
+                                    <button
+
+                                        onClick={() =>
+                                            openVehicleInfo(vehicle)
                                         }
 
-                                        {/*vehicle info*/}
-                                        <button
-
-                                            onClick={() =>
-                                                openVehicleInfo(vehicle)
-                                            }
-
-                                            className="
+                                        className="
         bg-cyan-600
         text-white
         px-3
@@ -1333,39 +1346,38 @@ Please renew your tax soon.
         rounded
     "
 
-                                        >
+                                    >
 
-                                            View Vehicle Info
+                                        View Vehicle Info
 
-                                        </button>
-                                        {
-                                            role === "admin" && (
+                                    </button>
+                                    {
+                                        role === "admin" && (
 
-                                                <button
-                                                    onClick={() =>
-                                                        deleteVehicle(vehicle.id)
-                                                    }
-                                                >
-                                                    Delete
-                                                </button>
+                                            <button
+                                                onClick={() =>
+                                                    deleteVehicle(vehicle.id)
+                                                }
+                                            >
+                                                Delete
+                                            </button>
 
-                                            )
-                                        }
+                                        )
+                                    }
 
-                                    </td>
+                                </td>
 
-                                </tr>
-                            ))}
+                            </tr>
+                        ))}
 
-                        </tbody>
+                    </tbody>
 
-                    </table>
-
-                </div>
+                </table>
 
             </div>
-            {
 
+
+            {
                 showHistory && (
 
                     <div
@@ -1650,7 +1662,7 @@ Please renew your tax soon.
             {
                 role === "admin" && (
 
-                    <div className="table-container">
+                    <div className="bg-white rounded-3xl shadow-lg p-6 mt-10 overflow-x-auto">
 
                         <h2>
                             Users
@@ -1714,9 +1726,7 @@ Please renew your tax soon.
                                     Viewer
                                 </option>
 
-                                <option value="admin">
-                                    Admin
-                                </option>
+
 
                             </select>
 
@@ -1769,53 +1779,64 @@ Please renew your tax soon.
                                             </td>
                                             <td>
 
-                                                <button
+                                                {
+                                                    user.username !== "admin" && (
 
-                                                    onClick={async () => {
+                                                        <button
 
-                                                        try {
+                                                            onClick={async () => {
 
-                                                            const token =
-                                                                localStorage.getItem(
-                                                                    "token"
-                                                                );
+                                                                try {
 
-                                                            await axios.delete(
+                                                                    const token =
+                                                                        localStorage.getItem(
+                                                                            "token"
+                                                                        );
 
-                                                                `http://127.0.0.1:5000/api/delete_user/${user.id}`,
+                                                                    await axios.delete(
 
-                                                                {
+                                                                        `http://127.0.0.1:5000/api/delete_user/${user.id}`,
 
-                                                                    headers: {
+                                                                        {
 
-                                                                        Authorization:
-                                                                            `Bearer ${token}`
+                                                                            headers: {
 
-                                                                    }
+                                                                                Authorization:
+                                                                                    `Bearer ${token}`
+
+                                                                            }
+
+                                                                        }
+
+                                                                    );
+
+                                                                    fetchUsers();
+
+                                                                } catch (err) {
+
+                                                                    console.log(err);
 
                                                                 }
 
-                                                            );
+                                                            }}
 
-                                                            fetchUsers();
+                                                            className="
+    bg-red-500
+    hover:bg-red-600
+    text-white
+    px-4
+    py-2
+    rounded-xl
+"
 
-                                                        } catch (err) {
+                                                        >
 
-                                                            console.log(err);
+                                                            Delete
 
-                                                        }
+                                                        </button>
 
-                                                    }}
-
-                                                    style={{
-                                                        background: "red"
-                                                    }}
-
-                                                >
-
-                                                    Delete
-
-                                                </button>
+                                                    )
+                                                }
 
                                             </td>
 
@@ -1834,7 +1855,7 @@ Please renew your tax soon.
             {
                 role === "admin" && (
 
-                    <div className="table-container">
+                    <div className="bg-white rounded-3xl shadow-lg p-6 mt-10 overflow-x-auto">
 
                         <h2>
                             Deleted Vehicles

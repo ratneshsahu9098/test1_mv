@@ -5,14 +5,18 @@ from flask_jwt_extended import (
     jwt_required,
     get_jwt_identity,
 )
+from flask import *
+from flask import jsonify, request
+from flask_jwt_extended import *
 import bcrypt
 from flask_cors import CORS
 import requests
 from datetime import datetime
 import json
 import os
+import pandas as pd
+from flask import send_file
 from flask import send_from_directory
-
 
 UPLOAD_FOLDER = "uploads"
 
@@ -24,13 +28,15 @@ import sqlite3
 
 app = Flask(__name__)
 
-CORS(app)
+
+CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
 
 app.secret_key = "supersecretkey"
 # app.config["JWT_SECRET_KEY"] = "jwt-secret-key"
 app.config["JWT_SECRET_KEY"] = "mv_tax_dashboard_super_secret_key_2026_secure"
 
 jwt = JWTManager(app)
+
 
 def get_current_user(username):
 
@@ -48,7 +54,7 @@ def get_current_user(username):
         WHERE username=?
 
         """,
-        (username,)
+        (username,),
     )
 
     row = cursor.fetchone()
@@ -59,13 +65,7 @@ def get_current_user(username):
 
         return None
 
-    return {
-
-        "username": username,
-
-        "role": row[0]
-
-    }
+    return {"username": username, "role": row[0]}
 
 
 def send_whatsapp_message(phone, message):
@@ -81,6 +81,93 @@ def send_whatsapp_message(phone, message):
 
 DB_FILE = "vehicles.db"
 
+
+@app.route("/api/export_users")
+@jwt_required()
+def export_users():
+
+    conn = sqlite3.connect(DB_FILE)
+
+    df = pd.read_sql_query("SELECT * FROM users", conn)
+
+    conn.close()
+
+    file_name = "users.xlsx"
+
+    df.to_excel(file_name, index=False)
+
+    return send_file(file_name, as_attachment=True)
+
+
+# Single user Export Data
+@app.route("/api/export_user/<int:id>")
+@jwt_required()
+def export_user(id):
+
+    conn = sqlite3.connect(DB_FILE)
+
+    cursor = conn.cursor()
+
+    # -------------------------
+    # GET USERNAME
+    # -------------------------
+
+    cursor.execute(
+        """
+
+        SELECT username
+
+        FROM users
+
+        WHERE id=?
+
+        """,
+        (id,),
+    )
+
+    row = cursor.fetchone()
+
+    if not row:
+
+        conn.close()
+
+        return jsonify({"error": "User not found"}), 404
+
+    username = row[0]
+
+    # -------------------------
+    # EXPORT VEHICLES
+    # -------------------------
+
+    query = """
+
+    SELECT
+        vehicle_number,
+        owner,
+        phone,
+        expiry_date,
+        chassis_last5,
+        state_name,
+        vahan_owner_name,
+        added_by
+
+    FROM vehicles
+
+    WHERE added_by=?
+
+    """
+
+    df = pd.read_sql_query(query, conn, params=(username,))
+
+    conn.close()
+
+    file_name = f"{username}_vehicles.xlsx"
+
+    df.to_excel(file_name, index=False)
+
+    return send_file(file_name, as_attachment=True)
+
+
 # -------------------------
 # CREATE DATABASE TABLES
 # -------------------------
@@ -91,8 +178,7 @@ cursor = conn.cursor()
 
 # USERS TABLE
 
-cursor.execute(
-    """
+cursor.execute("""
 
 CREATE TABLE IF NOT EXISTS
 users (
@@ -108,8 +194,7 @@ users (
 
 )
 
-"""
-)
+""")
 # DEFAULT ADMIN
 
 cursor.execute(
@@ -182,8 +267,7 @@ def uploaded_file(filename):
 
 # VEHICLES TABLE
 
-cursor.execute(
-    """
+cursor.execute("""
 
 CREATE TABLE IF NOT EXISTS
 vehicles (
@@ -204,17 +288,16 @@ vehicles (
     state_name TEXT,
 
     support_document TEXT,
-    vahan_owner_name TEXT
+    vahan_owner_name TEXT,
+    added_by TEXT
 
 )
 
-"""
-)
+""")
 
 # DELETED VEHICLES TABLE
 
-cursor.execute(
-    """
+cursor.execute("""
 
 CREATE TABLE IF NOT EXISTS
 deleted_vehicles (
@@ -244,13 +327,11 @@ deleted_vehicles (
 
 )
 
-"""
-)
+""")
 
 # HISTORY TABLE
 
-cursor.execute(
-    """
+cursor.execute("""
 
 CREATE TABLE IF NOT EXISTS
 vehicle_history (
@@ -271,8 +352,7 @@ vehicle_history (
     edited_at TEXT
 )
 
-"""
-)
+""")
 
 conn.commit()
 
@@ -426,19 +506,13 @@ def fetch_vehicle_info(vehicle_number):
 
             FETCH_RUNNING = False
 
-            return jsonify(
-                {"error": "JSON output not found"}
-            ), 500
+            return jsonify({"error": "JSON output not found"}), 500
 
         data = json.loads(json_line)
 
-        tax_upto = data.get(
-            "tax_upto"
-        )
+        tax_upto = data.get("tax_upto")
 
-        owner_name = data.get(
-            "owner_name"
-        )
+        owner_name = data.get("owner_name")
 
         # -------------------------
         # TAX EXTRACTION FAILED
@@ -523,6 +597,8 @@ def add_vehicle_api():
 
     file = request.files.get("support_document")
 
+    username = get_jwt_identity()
+
     support_document = ""
     # temp
     print(vehicle_number)
@@ -547,8 +623,7 @@ def add_vehicle_api():
 
     cursor = conn.cursor()
 
-    cursor.execute(
-        """
+    cursor.execute("""
 
 CREATE TABLE IF NOT EXISTS
 vehicle_history (
@@ -567,10 +642,10 @@ vehicle_history (
     owner TEXT,
 
     edited_at TEXT
+    
 )
 
-"""
-    )
+""")
 
     cursor.execute(
         """
@@ -584,11 +659,12 @@ vehicle_history (
         chassis_last5,
         state_name,
         support_document,
-        vahan_owner_name
+        vahan_owner_name,
+        added_by
 
     )
 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
 
     """,
         (
@@ -600,6 +676,7 @@ vehicle_history (
             state_name,
             support_document,
             "",
+            username,
         ),
     )
 
@@ -856,11 +933,6 @@ def restore_vehicle(id):
     return jsonify({"message": "Vehicle restored"})
 
 
-# -------------------------
-# UPDATE VEHICLE API
-# -------------------------
-
-
 @app.route("/api/update_vehicle/<int:id>", methods=["PUT"])
 @jwt_required()
 def update_vehicle_api(id):
@@ -873,41 +945,35 @@ def update_vehicle_api(id):
 
         return jsonify({"error": "Viewer access denied"}), 403
 
-    vehicle_number = request.form.get("vehicle_number")
-
-    expiry_date = request.form.get("expiry_date")
-
-    phone = request.form.get("phone")
-
-    owner = request.form.get("owner")
-
-    chassis_last5 = request.form.get("chassis_last5")
-
-    state_name = request.form.get("state_name")
-
-    file = request.files.get("support_document")
-
-    if file:
-
-        support_document = file.filename
-
-        file.save(os.path.join(UPLOAD_FOLDER, support_document))
+    data = request.get_json()
 
     conn = sqlite3.connect(DB_FILE)
 
     cursor = conn.cursor()
 
-    # GET OLD DATA
-
     cursor.execute("SELECT * FROM vehicles WHERE id=?", (id,))
 
     old_vehicle = cursor.fetchone()
 
-    if not file:
+    if not old_vehicle:
 
-        support_document = old_vehicle[7]
+        conn.close()
 
-    # SAVE INTO HISTORY
+        return jsonify({"error": "Vehicle not found"}), 404
+
+    vehicle_number = data.get("vehicle_number") or old_vehicle[1]
+
+    expiry_date = data.get("expiry") or old_vehicle[2]
+
+    phone = data.get("phone") or old_vehicle[3]
+
+    owner = data.get("owner") or old_vehicle[4]
+
+    chassis_last5 = data.get("chassis_last5") or old_vehicle[5]
+
+    state_name = old_vehicle[6]
+
+    support_document = old_vehicle[7]
 
     from datetime import datetime
 
@@ -922,7 +988,7 @@ def update_vehicle_api(id):
             edited_at
         )
         VALUES (?, ?, ?, ?, ?, ?)
-    """,
+        """,
         (
             old_vehicle[0],
             old_vehicle[1],
@@ -935,22 +1001,17 @@ def update_vehicle_api(id):
 
     cursor.execute(
         """
-
-    UPDATE vehicles
-
-    SET
-
-    vehicle_number=?,
-    expiry_date=?,
-    phone=?,
-    owner=?,
-    chassis_last5=?,
-    state_name=?,
-    support_document=?
-
-    WHERE id=?
-
-    """,
+        UPDATE vehicles
+        SET
+            vehicle_number=?,
+            expiry_date=?,
+            phone=?,
+            owner=?,
+            chassis_last5=?,
+            state_name=?,
+            support_document=?
+        WHERE id=?
+        """,
         (
             vehicle_number,
             expiry_date,
@@ -1005,12 +1066,10 @@ def home():
 
     else:
 
-        cursor.execute(
-            """
+        cursor.execute("""
         SELECT *
         FROM vehicles
-        """
-        )
+        """)
 
     vehicles = cursor.fetchall()
 
@@ -1103,7 +1162,7 @@ def edit_page(id):
 
 
 @app.route("/update/<int:id>", methods=["POST"])
-def update_vehicle(id):
+def update_vehicle_form(id):
 
     if "user" not in session:
         return redirect("/login")
@@ -1172,12 +1231,10 @@ def generate_report():
 
     cursor = conn.cursor()
 
-    cursor.execute(
-        """
+    cursor.execute("""
     SELECT *
     FROM vehicles
-    """
-    )
+    """)
 
     vehicles = cursor.fetchall()
 
@@ -1235,12 +1292,10 @@ def api_get_vehicles():
 
     cursor = conn.cursor()
 
-    cursor.execute(
-        """
+    cursor.execute("""
     SELECT *
     FROM vehicles
-    """
-    )
+    """)
 
     vehicles = cursor.fetchall()
 
@@ -1261,6 +1316,7 @@ def api_get_vehicles():
                 "state_name": vehicle[6],
                 "support_document": vehicle[7],
                 "vahan_owner_name": vehicle[8],
+                "added_by": vehicle[9],
             }
         )
 
@@ -1295,8 +1351,7 @@ def get_users():
 
     cursor = conn.cursor()
 
-    cursor.execute(
-        """
+    cursor.execute("""
 
         SELECT
             id,
@@ -1305,8 +1360,7 @@ def get_users():
 
         FROM users
 
-"""
-    )
+""")
 
     rows = cursor.fetchall()
 
@@ -1333,6 +1387,10 @@ def add_user():
     username = get_jwt_identity()
 
     user = get_current_user(username)
+
+    if role == "admin":
+
+        return jsonify({"error": "Cannot create admin"}), 403
 
     if user["role"] != "admin":
 
@@ -1437,6 +1495,100 @@ def delete_user(id):
     return jsonify({"message": "User deleted"})
 
 
+@app.route("/api/update_user_role/<int:id>", methods=["PUT"])
+@jwt_required()
+def update_user_role(id):
+
+    username = get_jwt_identity()
+
+    user = get_current_user(username)
+
+    if user["role"] != "admin":
+
+        return jsonify({"error": "Admin access required"}), 403
+
+    data = request.get_json()
+
+    new_role = data.get("role")
+
+    conn = sqlite3.connect(DB_FILE)
+
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+
+        UPDATE users
+
+        SET role=?
+
+        WHERE id=?
+
+        """,
+        (new_role, id),
+    )
+
+    conn.commit()
+
+    conn.close()
+
+    return jsonify({"message": "Role updated"})
+
+
+# ADMIN PANEL
+@app.route("/api/update_user/<int:id>", methods=["PUT"])
+@jwt_required()
+def update_user(id):
+
+    username = get_jwt_identity()
+
+    current_user = get_current_user(username)
+
+    if current_user["role"] != "admin":
+
+        return jsonify({"error": "Admin access required"}), 403
+
+    data = request.get_json()
+
+    new_username = data.get("username")
+    new_password = data.get("password")
+    hashed_password = bcrypt.hashpw(new_password.encode(), bcrypt.gensalt()).decode()
+
+    conn = sqlite3.connect(DB_FILE)
+
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT username FROM users WHERE id=?", (id,))
+
+    target_user = cursor.fetchone()
+
+    if target_user and target_user[0] == "admin":
+
+        conn.close()
+
+        return jsonify({"error": "Admin cannot be edited"}), 403
+
+    cursor.execute(
+        """
+
+        UPDATE users
+
+        SET username=?,
+            password=?
+
+        WHERE id=?
+
+        """,
+        (new_username, hashed_password, id),
+    )
+
+    conn.commit()
+
+    conn.close()
+
+    return jsonify({"message": "User updated"})
+
+
 # -------------------------
 # API - CHANGE PASSWORD
 # -------------------------
@@ -1453,6 +1605,7 @@ def change_password():
     data = request.get_json()
 
     new_password = data.get("new_password")
+    hashed_password = bcrypt.hashpw(new_password.encode(), bcrypt.gensalt()).decode()
 
     conn = sqlite3.connect(DB_FILE)
 
@@ -1468,7 +1621,7 @@ def change_password():
         WHERE username=?
 
 """,
-        (new_password, user["username"]),
+        (hashed_password, user["username"]),
     )
 
     conn.commit()
@@ -1476,6 +1629,69 @@ def change_password():
     conn.close()
 
     return jsonify({"message": "Password updated"})
+
+
+@app.route("/api/update_profile", methods=["PUT"])
+@jwt_required()
+def update_profile():
+
+    current_username = get_jwt_identity()
+
+    data = request.get_json()
+
+    new_username = data.get("username")
+
+    new_password = data.get("password")
+
+    conn = sqlite3.connect(DB_FILE)
+
+    cursor = conn.cursor()
+
+    # -------------------------
+    # HASH PASSWORD
+    # -------------------------
+
+    if new_password:
+
+        hashed_password = bcrypt.hashpw(
+            new_password.encode(), bcrypt.gensalt()
+        ).decode()
+
+        cursor.execute(
+            """
+
+            UPDATE users
+
+            SET
+                username=?,
+                password=?
+
+            WHERE username=?
+
+            """,
+            (new_username, hashed_password, current_username),
+        )
+
+    else:
+
+        cursor.execute(
+            """
+
+            UPDATE users
+
+            SET username=?
+
+            WHERE username=?
+
+            """,
+            (new_username, current_username),
+        )
+
+    conn.commit()
+
+    conn.close()
+
+    return jsonify({"message": "Profile updated"})
 
 
 # -------------------------
@@ -1519,7 +1735,7 @@ def api_login():
 
         token = create_access_token(identity=username)
 
-        return jsonify({"token": token, "role": user[2]})
+        return jsonify({"token": token, "role": user[2], "username": username})
 
     return jsonify({"error": "Invalid credentials"}), 401
 
@@ -1545,8 +1761,7 @@ def get_deleted_vehicles():
 
     cursor = conn.cursor()
 
-    cursor.execute(
-        """
+    cursor.execute("""
 
         SELECT *
 
@@ -1554,8 +1769,7 @@ def get_deleted_vehicles():
 
         ORDER BY id DESC
 
-"""
-    )
+""")
 
     rows = cursor.fetchall()
 

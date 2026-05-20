@@ -1,6 +1,7 @@
 from playwright.sync_api import sync_playwright
 import json
 import sys
+import time
 
 
 # -------------------------
@@ -53,10 +54,11 @@ if not STATE_NAME:
 
 with sync_playwright() as p:
 
-    DEBUG = True
+    DEBUG = False
 
     browser = p.chromium.launch(
         headless=not DEBUG,
+        slow_mo=300,
         args=[
             "--incognito",
             "--disable-blink-features=AutomationControlled",
@@ -64,7 +66,11 @@ with sync_playwright() as p:
             "--no-sandbox",
         ],
     )
-    context = browser.new_context()
+    context = browser.new_context(
+        user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0 Safari/537.36",
+        viewport={"width": 1366, "height": 768},
+        locale="en-IN",
+    )
 
     page = context.new_page()
 
@@ -78,10 +84,29 @@ with sync_playwright() as p:
 
         context.clear_cookies()
 
-        page.goto(
-            "https://parivahan.gov.in/en/content/vehicle-related-services",
-            wait_until="domcontentloaded",
-        )
+        url = "https://parivahan.gov.in/en/content/vehicle-related-services"
+
+        for attempt in range(3):
+
+            try:
+
+                print(f"Opening Parivahan Attempt {attempt+1}")
+
+                page.goto(url, wait_until="networkidle", timeout=120000)
+
+                print("Parivahan loaded")
+
+                break
+
+            except Exception as e:
+
+                print(f"Retry failed: {e}")
+
+                time.sleep(5)
+
+                if attempt == 2:
+
+                    raise Exception("Parivahan not reachable")
 
         page.wait_for_selector(
             "select.select-css-vehicle-related-services", timeout=30000
@@ -216,15 +241,11 @@ with sync_playwright() as p:
 
         try:
 
-            dialogs = page.locator(
-                ".ui-dialog"
-            )
+            dialogs = page.locator(".ui-dialog")
 
             dialog_count = dialogs.count()
 
-            print(
-                f"Dialogs found: {dialog_count}"
-            )
+            print(f"Dialogs found: {dialog_count}")
 
             for i in range(dialog_count):
 
@@ -232,9 +253,7 @@ with sync_playwright() as p:
 
                 if dialog.is_visible():
 
-                    buttons = dialog.locator(
-                        "button"
-                    )
+                    buttons = dialog.locator("button")
 
                     btn_count = buttons.count()
 
@@ -255,18 +274,11 @@ with sync_playwright() as p:
                                 f"Visible={visible}"
                             )
 
-                            if (
-                                "Proceed" in text
-                                and visible
-                            ):
+                            if "Proceed" in text and visible:
 
-                                btn.click(
-                                    force=True
-                                )
+                                btn.click(force=True)
 
-                                print(
-                                    "Authentication Proceed clicked"
-                                )
+                                print("Authentication Proceed clicked")
 
                                 raise SystemExit
 
@@ -280,9 +292,7 @@ with sync_playwright() as p:
 
         except Exception as e:
 
-            print(
-                "Second Proceed failed"
-            )
+            print("Second Proceed failed")
 
             print(e)
 

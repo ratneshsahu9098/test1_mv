@@ -24,6 +24,10 @@ function Login() {
       );
 
       localStorage.setItem(
+  "username",
+  response.data.username
+);
+      localStorage.setItem(
         "token",
         response.data.token
       );
@@ -31,9 +35,12 @@ function Login() {
         "role",
         response.data.role
       )
-
+      localStorage.setItem(
+  "username",
+  response.data.username
+);
       window.location.href =
-        "/dashboard";
+  "/";
 
     } catch (error) {
 
@@ -43,9 +50,13 @@ function Login() {
 
   return (
 
-    <div style={{ padding: "50px" }}>
+  <div className="flex items-center justify-center h-screen bg-gray-100">
 
-      <h1>🔐 Login</h1>
+    <div className="bg-white p-10 rounded-2xl shadow-xl w-96">
+
+      <h1 className="text-3xl font-bold mb-8 text-center">
+        🔐 MV Tax Login
+      </h1>
 
       <input
         type="text"
@@ -53,9 +64,8 @@ function Login() {
         onChange={(e) =>
           setUsername(e.target.value)
         }
+        className="w-full p-4 border rounded-xl mb-4 outline-none focus:ring-2 focus:ring-blue-500"
       />
-
-      <br /><br />
 
       <input
         type="password"
@@ -63,16 +73,21 @@ function Login() {
         onChange={(e) =>
           setPassword(e.target.value)
         }
+        className="w-full p-4 border rounded-xl mb-6 outline-none focus:ring-2 focus:ring-blue-500"
       />
 
-      <br /><br />
-
-      <button onClick={loginUser}>
+      <button
+        onClick={loginUser}
+        className="w-full bg-blue-500 hover:bg-blue-600 text-white p-4 rounded-xl font-semibold"
+      >
         Login
       </button>
 
     </div>
-  );
+
+  </div>
+
+);
 }
 
 export default Login;

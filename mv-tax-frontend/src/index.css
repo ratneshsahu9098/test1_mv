@@ -1,4 +1,4 @@
-body {
+/* body {
 
   margin: 0;
   font-family: Arial, sans-serif;
@@ -149,4 +149,9 @@ button {
 button:hover {
 
   opacity: 0.9;
-}
+} */
+
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

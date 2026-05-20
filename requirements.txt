@@ -1,24 +1,10 @@
 Flask
-flask-cors
-flask-jwt-extended
-pywhatkit
-pyautogui
-requests
-Flask
 Flask-Cors
 Flask-JWT-Extended
-bcrypt
+Werkzeug
+pandas
+openpyxl
 requests
-playwright
-reportlab
 gunicorn
-
-
-# Flask==3.0.3
-# Flask-Cors==5.0.0
-# Flask-JWT-Extended==4.6.0
-# bcrypt==4.2.0
-# requests==2.32.3
-# playwright==1.52.0
-# reportlab==4.2.2
-# gunicorn==23.0.0
+python-dotenv
+pywhatkit
