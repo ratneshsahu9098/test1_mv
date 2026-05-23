@@ -24,8 +24,11 @@ load_dotenv()
 
 app = Flask(__name__)
 
-ALLOWED_ORIGINS = os.getenv("CORS_ORIGINS", "http://localhost:5173,http://localhost:5000,https://test1-mv-e7pw.vercel.app").split(",")
-CORS(app, resources={r"/api/*": {"origins": ALLOWED_ORIGINS}}, supports_credentials=True)
+ALLOWED_ORIGINS = os.getenv("CORS_ORIGINS", "*")
+if ALLOWED_ORIGINS == "*":
+    CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
+else:
+    CORS(app, resources={r"/api/*": {"origins": ALLOWED_ORIGINS.split(",")}}, supports_credentials=True)
 
 app.secret_key = os.getenv("FLASK_SECRET_KEY") or os.urandom(32).hex()
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY") or app.secret_key
