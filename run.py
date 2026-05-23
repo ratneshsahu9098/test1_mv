@@ -1,5 +1,7 @@
-# File: run.py
-from app.scheduler import start_scheduler
-
-if __name__ == "__main__":
-    start_scheduler()
+import sys
+import traceback
+try:
+    from dashboard import app
+except Exception:
+    traceback.print_exc()
+    sys.exit(1)
