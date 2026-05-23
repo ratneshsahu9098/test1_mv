@@ -2,13 +2,19 @@ import {
     useState
 } from "react";
 
+import toast from "react-hot-toast";
 import EditVehicleModal from "./EditVehicleModal";
 import axios from "axios";
+import API_URL from "../config";
+import { Lock } from "lucide-react";
 import HistoryModal from "./HistoryModal";
+import FetchModal from "./FetchModal";
 
 function VehicleTable({
     vehicles
 }) {
+    const role =
+        localStorage.getItem("role");
 
     const [selectedVehicle, setSelectedVehicle] =
         useState(null);
@@ -21,329 +27,292 @@ function VehicleTable({
     const [isModalOpen, setIsModalOpen] =
         useState(false);
 
-    const openEditModal = (
-        vehicle
-    ) => {
+    const [loadingFetch, setLoadingFetch] =
+        useState(null);
+    const [fetchLogs, setFetchLogs] =
+        useState([]);
+    const [fetchError, setFetchError] =
+        useState(null);
+    const [fetchVehicle, setFetchVehicle] =
+        useState(null);
+    const [fetchLoading, setFetchLoading] =
+        useState(false);
 
-        setSelectedVehicle(
-            vehicle
-        );
+    const [loadingDelete, setLoadingDelete] =
+        useState(null);
+    const [sendingEmail, setSendingEmail] =
+        useState(null);
+    const [sendingPush, setSendingPush] =
+        useState(null);
 
+    const sendEmailReminder = async (vehicle) => {
+        try {
+            setSendingEmail(vehicle.id);
+            const token = localStorage.getItem("token");
+            await axios.post(
+                API_URL + "/api/send_reminder",
+                { vehicle_id: vehicle.id, channel: "email" },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            toast.success(`Email reminder sent for ${vehicle.vehicle_number}`);
+        } catch (error) {
+            const msg = error.response?.data?.error || "Email send failed";
+            toast.error(msg);
+        } finally {
+            setSendingEmail(null);
+        }
+    };
+
+    const sendPushReminder = async (vehicle) => {
+        try {
+            setSendingPush(vehicle.id);
+            const token = localStorage.getItem("token");
+            await axios.post(
+                API_URL + "/api/send_reminder",
+                { vehicle_id: vehicle.id, channel: "push" },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            toast.success(`Push sent for ${vehicle.vehicle_number}`);
+        } catch (error) {
+            const msg = error.response?.data?.error || "Push send failed";
+            toast.error(msg);
+        } finally {
+            setSendingPush(null);
+        }
+    };
+
+    const openEditModal = (vehicle) => {
+        setSelectedVehicle(vehicle);
         setIsModalOpen(true);
-
     };
-    const fetchVehicleInfo = async (
-        vehicleNumber
-    ) => {
 
+    const fetchVehicleInfo = async (vehicleNumber) => {
         try {
-
-            const token =
-                localStorage.getItem(
-                    "token"
-                );
-
-            const response =
-                await axios.get(
-                    `http://127.0.0.1:5000/api/fetch_vehicle_info/${vehicleNumber}`,
-                    {
-                        headers: {
-                            Authorization:
-                                `Bearer ${token}`
-                        }
-                    }
-                );
-
-            alert(
-                "Vehicle Updated Successfully"
+            setLoadingFetch(vehicleNumber);
+            setFetchVehicle(vehicleNumber);
+            setFetchLogs([]);
+            setFetchError(null);
+            setFetchLoading(true);
+            const token = localStorage.getItem("token");
+            const response = await axios.get(
+                `${API_URL}/api/fetch_vehicle_info/${vehicleNumber}`,
+                { headers: { Authorization: `Bearer ${token}` } }
             );
-
-            console.log(
-                response.data
-            );
-
-            window.location.reload();
-
+            const output = response.data?.output || "";
+            setFetchLogs(output.split("\n").filter(Boolean));
+            setFetchLoading(false);
+            toast.success("Vehicle Updated Successfully");
+            setTimeout(() => window.location.reload(), 1500);
         } catch (error) {
-
-            console.log(error);
-
-            alert(
-                "Fetch Failed"
-            );
-
+            setFetchLoading(false);
+            const data = error.response?.data;
+            const output = data?.output || "";
+            if (output) {
+                setFetchLogs(output.split("\n").filter(Boolean));
+            } else {
+                setFetchLogs([data?.error || "Unknown error"]);
+            }
+            if (data?.challan_pending) {
+                setFetchError(data.error || "Pending challans on Parivahan");
+                toast.error(data.error || "Pending challans on Parivahan");
+            } else {
+                setFetchError(data?.error || "Fetch Failed");
+                toast.error(data?.error || "Fetch Failed");
+            }
+        } finally {
+            setLoadingFetch(null);
         }
-
     };
-    const openHistoryModal = async (
-        vehicleId
-    ) => {
 
+    const closeFetchModal = () => {
+        setFetchVehicle(null);
+        setFetchLogs([]);
+        setFetchError(null);
+        setFetchLoading(false);
+    };
+
+    const openHistoryModal = async (vehicleId) => {
         try {
-
-            const token =
-                localStorage.getItem(
-                    "token"
-                );
-
-            const response =
-                await axios.get(
-                    `http://127.0.0.1:5000/api/vehicle_history/${vehicleId}`,
-                    {
-                        headers: {
-                            Authorization:
-                                `Bearer ${token}`
-                        }
-                    }
-                );
-
-            setHistoryData(
-                response.data
+            const token = localStorage.getItem("token");
+            const response = await axios.get(
+                `${API_URL}/api/vehicle_history/${vehicleId}`,
+                { headers: { Authorization: `Bearer ${token}` } }
             );
-
+            setHistoryData(response.data);
             setHistoryOpen(true);
-
         } catch (error) {
-
-            console.log(error);
-
-            alert(
-                "History Load Failed"
-            );
-
+            toast.error("History Load Failed");
         }
-
     };
-    const deleteVehicle = async (
-        id
-    ) => {
 
-        if (
-            !window.confirm(
-                "Delete vehicle?"
-            )
-        ) {
-            return;
-        }
-
+    const deleteVehicle = async (id) => {
+        if (!window.confirm("Delete vehicle?")) return;
         try {
-
-            const token =
-                localStorage.getItem(
-                    "token"
-                );
-
+            setLoadingDelete(id);
+            const token = localStorage.getItem("token");
             await axios.delete(
-                `http://127.0.0.1:5000/api/delete_vehicle/${id}`,
-                {
-                    headers: {
-                        Authorization:
-                            `Bearer ${token}`
-                    }
-                }
+                `${API_URL}/api/delete_vehicle/${id}`,
+                { headers: { Authorization: `Bearer ${token}` } }
             );
-
-            alert(
-                "Vehicle Deleted"
-            );
-
+            toast.success("Vehicle Deleted");
             window.location.reload();
-
         } catch (error) {
-
-            console.log(error);
-
-            alert(
-                "Delete Failed"
-            );
-
+            toast.error("Delete Failed");
+        } finally {
+            setLoadingDelete(null);
         }
-
     };
+
+    const statusBadge = (expiryDate) => {
+        const dueDate = new Date(expiryDate);
+        const today = new Date();
+        const diffDays = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
+        if (diffDays < 0) {
+            return <span className="px-3 py-1 rounded-full text-white text-sm font-medium bg-red-500">Expired</span>;
+        }
+        if (diffDays <= 7) {
+            return <span className="px-3 py-1 rounded-full text-white text-sm font-medium bg-yellow-500">Due Soon</span>;
+        }
+        return <span className="px-3 py-1 rounded-full text-white text-sm font-medium bg-green-500">Active</span>;
+    };
+
     return (
-
-        <div className="mt-10 bg-white rounded-2xl shadow-lg p-6">
-
-            <h2 className="text-2xl font-bold mb-6">
-                Vehicle Records
-            </h2>
+        <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border border-gray-200 dark:border-gray-800 rounded-2xl shadow-xl p-6">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Vehicle Records</h2>
 
             <div className="overflow-x-auto">
-
                 <table className="w-full">
-
                     <thead>
-
-                        <tr className="border-b">
-
-                            <th className="text-left p-3">
-                                Vehicle
-                            </th>
-
-                            <th className="text-left p-3">
-                                Owner
-                            </th>
-                            <th className="text-left p-3">
-                                VAHAN Owner
-                            </th>
-                            <th className="text-left p-3">
-  Added By
-</th>
-
-                            <th className="text-left p-3">
-                                Chassis Last 5
-                            </th>
-
-
-                            <th className="text-left p-3">
-                                Expiry
-                            </th>
-
-                            <th className="text-left p-3">
-                                Status
-                            </th>
-                            <th className="text-left p-3">
-                                Actions
-                            </th>
-
+                        <tr className="border-b border-gray-200 dark:border-gray-800">
+                            <th className="text-left p-3 text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider">Vehicle</th>
+                            <th className="text-left p-3 text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider">Owner</th>
+                            <th className="text-left p-3 text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider">VAHAN Owner</th>
+                            <th className="text-left p-3 text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider">Added By</th>
+                            <th className="text-left p-3 text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider">Email</th>
+                            <th className="text-left p-3 text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider">Chassis</th>
+                            <th className="text-left p-3 text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider">Expiry</th>
+                            <th className="text-left p-3 text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider">Status</th>
+                            <th className="text-left p-3 text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider">Actions</th>
                         </tr>
-
                     </thead>
-
                     <tbody>
-
-                        {vehicles.map((vehicle) => (
-
-                            <tr
-                                key={vehicle.id}
-                                className="border-b hover:bg-gray-100"
-                            >
-
-                                <td className="p-3 font-semibold">
-                                    {vehicle.vehicle_number}
+                        {vehicles.length === 0 ? (
+                            <tr>
+                                <td colSpan={9} className="p-10 text-center text-gray-400 dark:text-gray-500">
+                                    No vehicles found
                                 </td>
-
-                                <td className="p-3">
-                                    {vehicle.owner}
-                                </td>
-                                <td className="p-3">
-                                    {vehicle.vahan_owner_name || "-"}
-                                </td>
-                            <td className="p-3">
-  {vehicle.added_by || "-"}
-</td>
-                                <td className="p-3">
-                                    {vehicle.chassis_last5}
-                                </td>
-
-                                <td className="p-3">
-                                    {vehicle.expiry_date}
-                                </td>
-
-                                <td className="p-3">
-
-                                    <span
-                                        className={`px-3 py-1 rounded-full text-white text-sm
-        ${vehicle.status === "Expired"
-                                                ? "bg-red-500"
-                                                : vehicle.status === "Active"
-                                                    ? "bg-green-500"
-                                                    : "bg-orange-500"
-                                            }`}
-                                    >
-
-                                        {vehicle.status}
-
-                                    </span>
-
-                                </td>
-
-                                <td className="p-3">
-
-                                    <div className="flex flex-wrap gap-2">
-
-                                        <button
-                                            onClick={() =>
-                                                fetchVehicleInfo(
-                                                    vehicle.vehicle_number
-                                                )
-
-                                            }
-                                            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg"
-                                        >
-                                            Fetch
-                                        </button>
-
-                                        <button
-                                            className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg"
-                                        >
-                                            WhatsApp
-                                        </button>
-
-                                        <button
-                                            onClick={() =>
-                                                openEditModal(
-                                                    vehicle
-                                                )
-                                            }
-                                            className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg"
-                                        >
-                                            Edit
-                                        </button>
-                                        <button
-                                            onClick={() =>
-                                                deleteVehicle(
-                                                    vehicle.id
-                                                )
-                                            }
-                                            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg"
-                                        >
-                                            Delete
-                                        </button>
-                                        <button
-                                            onClick={() =>
-                                                openHistoryModal(
-                                                    vehicle.id
-                                                )
-                                            }
-                                            className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg"
-                                        >
-                                            History
-                                        </button>
-
-
-                                    </div>
-
-                                </td>
-
                             </tr>
-
-                        ))}
-
+                        ) : (
+                            vehicles.map((vehicle) => (
+                                <tr key={vehicle.id} className="border-b border-gray-200 dark:border-gray-800/50 hover:bg-gray-100/30 dark:hover:bg-gray-800/30 transition-colors">
+                                    <td className="p-3 font-semibold text-gray-900 dark:text-white">{vehicle.vehicle_number}</td>
+                                    <td className="p-3 text-gray-700 dark:text-gray-300">{vehicle.owner}</td>
+                                    <td className="p-3 text-gray-500 dark:text-gray-400">{vehicle.vahan_owner_name || "-"}</td>
+                                    <td className="p-3 text-gray-500 dark:text-gray-400">{vehicle.added_by || "-"}</td>
+                                    <td className="p-3 text-gray-500 dark:text-gray-400 max-w-[160px] truncate">{vehicle.email || "-"}</td>
+                                    <td className="p-3 text-gray-700 dark:text-gray-300 font-mono">{vehicle.chassis_last5}</td>
+                                    <td className="p-3 text-gray-700 dark:text-gray-300">{vehicle.expiry_date}</td>
+                                    <td className="p-3">{statusBadge(vehicle.expiry_date)}</td>
+                                    <td className="p-3">
+                                        <div className="flex gap-2 flex-wrap min-w-[320px]">
+                                            {role !== "viewer" ? (
+                                                <button
+                                                    onClick={() => fetchVehicleInfo(vehicle.vehicle_number)}
+                                                    disabled={loadingFetch === vehicle.vehicle_number}
+                                                    className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50 transition-all"
+                                                >
+                                                    {loadingFetch === vehicle.vehicle_number ? "Fetching..." : "Fetch"}
+                                                </button>
+                                            ) : (
+                                                <span className="bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 px-3 py-1.5 rounded-lg text-sm cursor-not-allowed inline-flex items-center gap-1.5"><Lock size={14} /> Fetch</span>
+                                            )}
+                                            {role !== "viewer" && (vehicle.email || localStorage.getItem("email")) ? (
+                                                <button
+                                                    onClick={() => sendEmailReminder(vehicle)}
+                                                    disabled={sendingEmail === vehicle.id}
+                                                    className="bg-orange-600 hover:bg-orange-700 text-white px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50 transition-all"
+                                                >
+                                                    {sendingEmail === vehicle.id ? "..." : "Mail"}
+                                                </button>
+                                            ) : null}
+                                            {role !== "viewer" && localStorage.getItem("fcm_token") ? (
+                                                <button
+                                                    onClick={() => sendPushReminder(vehicle)}
+                                                    disabled={sendingPush === vehicle.id}
+                                                    className="bg-sky-600 hover:bg-sky-700 text-white px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50 transition-all"
+                                                >
+                                                    {sendingPush === vehicle.id ? "..." : "Push"}
+                                                </button>
+                                            ) : null}
+                                            {role !== "viewer" ? (
+                                                <button
+                                                    onClick={() => openEditModal(vehicle)}
+                                                    className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-all"
+                                                >
+                                                    Edit
+                                                </button>
+                                            ) : (
+                                                <span className="bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 px-3 py-1.5 rounded-lg text-sm cursor-not-allowed inline-flex items-center gap-1.5"><Lock size={14} /> Edit</span>
+                                            )}
+                                            <button
+                                                onClick={() => openHistoryModal(vehicle.id)}
+                                                className="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-all"
+                                            >
+                                                History
+                                            </button>
+                                            {role === "admin" && (
+                                                <button
+                                                    onClick={() => deleteVehicle(vehicle.id)}
+                                                    disabled={loadingDelete === vehicle.id}
+                                                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50 transition-all"
+                                                >
+                                                    {loadingDelete === vehicle.id ? "..." : "Delete"}
+                                                </button>
+                                            )}
+                                            {role !== "viewer" ? (
+                                                <button
+                                                    onClick={() => {
+                                                        const message = `🚗 MV Tax Reminder\n\nVehicle: ${vehicle.vehicle_number}\nExpiry: ${vehicle.expiry_date}\nPlease renew your vehicle tax on time.\n- MV Tax`;
+                                                        const whatsappUrl = `https://wa.me/91${vehicle.phone}?text=${encodeURIComponent(message)}`;
+                                                        window.open(whatsappUrl, "_blank");
+                                                    }}
+                                                    className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-all"
+                                                >
+                                                    WhatsApp
+                                                </button>
+                                            ) : (
+                                                <span className="bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 px-3 py-1.5 rounded-lg text-sm cursor-not-allowed inline-flex items-center gap-1.5"><Lock size={14} /> WhatsApp</span>
+                                            )}
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
                     </tbody>
-
                 </table>
-
             </div>
+
             <EditVehicleModal
+                key={selectedVehicle?.id || "vehicle-edit-modal"}
                 vehicle={selectedVehicle}
                 isOpen={isModalOpen}
-                onClose={() =>
-                    setIsModalOpen(false)
-                }
+                onClose={() => setIsModalOpen(false)}
             />
             <HistoryModal
                 isOpen={historyOpen}
-                onClose={() =>
-                    setHistoryOpen(false)
-                }
+                onClose={() => setHistoryOpen(false)}
                 historyData={historyData}
             />
+            <FetchModal
+                isOpen={!!fetchVehicle}
+                onClose={closeFetchModal}
+                vehicleNumber={fetchVehicle}
+                logs={fetchLogs}
+                loading={fetchLoading}
+                error={fetchError}
+            />
         </div>
-
     );
-
 }
-
 
 export default VehicleTable;

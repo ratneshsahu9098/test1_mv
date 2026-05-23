@@ -29,10 +29,16 @@ def send_alert(vehicle, phone, message):
 
     response = requests.post(url, data=payload)
 
-    print("\nTelegram Response:")
-    print(response.json())
+    if response.status_code != 200:
 
-    save_log(vehicle, phone, message)
+        print(f"Telegram alert failed: {response.text}")
+
+    else:
+
+        print("\nTelegram Response:")
+        print(response.json())
+
+        save_log(vehicle, phone, message)
 
 def save_log(vehicle, phone, message):
 

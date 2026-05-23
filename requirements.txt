@@ -7,4 +7,9 @@ openpyxl
 requests
 gunicorn
 python-dotenv
-pywhatkit
+APScheduler
+bcrypt
+reportlab
+python-docx
+firebase-admin
+psycopg2-binary

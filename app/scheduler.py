@@ -1,19 +1,24 @@
-# File: app/scheduler.py
-import schedule
-import time
+from apscheduler.schedulers.background import BackgroundScheduler
 from app.checker import check_expiry
+# from app.auto_fetcher import auto_fetch_vehicles, auto_fetch_expiring_vehicles  # removed for deployment (needs Playwright)
+from config.settings import SCHEDULE_TIME
+
+scheduler = BackgroundScheduler(daemon=True)
+
 
 def start_scheduler():
+    hour, minute = SCHEDULE_TIME.split(":")
 
-    print("\nMV TAX BOT SCHEDULER STARTED...\n")
+    print(f"\nMV TAX SCHEDULER STARTED (daily at {SCHEDULE_TIME})...\n")
 
-    # Run every day at 9:00 AM
-    schedule.every().day.at("09:00").do(check_expiry)
+    scheduler.add_job(
+        check_expiry,
+        "cron",
+        hour=int(hour),
+        minute=int(minute),
+        id="check_expiry",
+        replace_existing=True,
+    )
 
-    # Run once immediately
     check_expiry()
-
-    while True:
-
-        schedule.run_pending()
-        time.sleep(1)
+    scheduler.start()

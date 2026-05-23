@@ -1,305 +1,144 @@
-import Dashboard from "./pages/Dashboard";
-import {
-  useEffect,
-  useState
-} from "react";
-import Login from "./pages/Login";
-import {
-  Routes,
-  Route
-} from "react-router-dom";
-
-import Vehicles from "./pages/Vehicles";
-import Users from "./pages/Users";
-import Settings from "./pages/Settings";
-import DeletedVehicles from "./pages/DeletedVehicles";
+import { lazy, Suspense } from "react";
+import { Routes, Route } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute";
-import AddVehicleForm from "./components/AddVehicleForm";
-import VehicleTable from "./components/VehicleTable";
-import axios from "axios";
-
 import Sidebar from "./components/Sidebar";
-import StatsCard from "./components/StatsCard";
+
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const Plans = lazy(() => import("./pages/Plans"));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const Login = lazy(() => import("./pages/Login"));
+const Register = lazy(() => import("./pages/Register"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Vehicles = lazy(() => import("./pages/Vehicles"));
+const Users = lazy(() => import("./pages/Users"));
+const Settings = lazy(() => import("./pages/Settings"));
+const DeletedVehicles = lazy(() => import("./pages/DeletedVehicles"));
+const DeletedUsers = lazy(() => import("./pages/DeletedUsers"));
+const Notifications = lazy(() => import("./pages/Notifications"));
+const Requests = lazy(() => import("./pages/Requests"));
 
 function App() {
-
-
-  const [vehicles, setVehicles] =
-    useState([]);
-
-  useEffect(() => {
-
-    fetchVehicles();
-
-  }, []);
-  const [search, setSearch] =
-    useState("");
-
-  const fetchVehicles = async () => {
-
-    try {
-
-      const token =
-        localStorage.getItem(
-          "token"
-        );
-
-      const response =
-        await axios.get(
-          "http://127.0.0.1:5000/api/vehicles",
-          {
-            headers: {
-              Authorization:
-                `Bearer ${token}`
-            }
-          }
-        );
-
-      console.log(response.data);
-
-      const data =
-        response.data.vehicles ||
-        response.data;
-
-      const updatedVehicles =
-        data.map((vehicle) => {
-
-          const today =
-            new Date();
-
-          const expiry =
-            new Date(
-              vehicle.expiry_date
-            );
-
-          const diff =
-            Math.ceil(
-              (
-                expiry - today
-              ) /
-              (1000 * 60 * 60 * 24)
-            );
-
-          let status =
-            "Active";
-
-          if (diff < 0) {
-
-            status = "Expired";
-
-          } else if (diff <= 7) {
-
-            status =
-              "Expiring Soon";
-
-          }
-
-          return {
-            ...vehicle,
-            status
-          };
-
-        });
-
-      setVehicles(
-        updatedVehicles
-      );
-    } catch (error) {
-
-      console.log(error);
-
-    }
-
-  };
-
-  const total =
-    vehicles.length;
-
-  const expired =
-    vehicles.filter(
-      v => v.status === "Expired"
-    ).length;
-
-  const active =
-    vehicles.filter(
-      v => v.status === "Active"
-    ).length;
-
-  const expiring =
-    vehicles.filter(
-      v =>
-        v.status ===
-        "Expiring Soon"
-    ).length;
-
-  const filteredVehicles =
-    vehicles.filter((vehicle) =>
-      vehicle.vehicle_number
-        ?.toLowerCase()
-        .includes(
-          search.toLowerCase()
-        ) ||
-      vehicle.owner
-        ?.toLowerCase()
-        .includes(
-          search.toLowerCase()
-        )
-    );
-
   return (
-
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-950 flex items-center justify-center">
+        <div className="text-gray-500 dark:text-gray-400 text-lg animate-pulse">Loading...</div>
+      </div>
+    }>
     <Routes>
+      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/register" element={<Register />} />
       <Route
         path="/vehicles"
         element={
           <ProtectedRoute>
-
             <div className="flex">
-
               <Sidebar />
-
-             <div className="flex-1 bg-gray-100 min-h-screen p-6">
-
+              <div className="flex-1 bg-gray-50 dark:bg-gray-950 min-h-screen">
                 <Vehicles />
-
               </div>
-
             </div>
-
+          </ProtectedRoute>
+        }
+      />
+      <Route path="/plans" element={<Plans />} />
+      <Route
+        path="/login"
+        element={
+          <div className="min-h-screen bg-gray-100 dark:bg-gray-950 flex items-center justify-center">
+            <Login />
+          </div>
+        }
+      />
+      <Route
+        path="/users"
+        element={
+          <ProtectedRoute>
+            <div className="flex">
+              <Sidebar />
+              <div className="flex-1 bg-gray-50 dark:bg-gray-950 min-h-screen">
+                <Users />
+              </div>
+            </div>
           </ProtectedRoute>
         }
       />
       <Route
-  path="/login"
-  element={
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-
-      <Login />
-
-    </div>
-  }
-/>
-      <Route
-  path="/users"
-  element={
-    <ProtectedRoute>
-
-      <div className="flex">
-
-        <Sidebar />
-
-        <div className="flex-1 bg-gray-100 min-h-screen p-6">
-
-          <Users />
-
-        </div>
-
-      </div>
-
-    </ProtectedRoute>
-  }
-/>
-
-      <Route
-  path="/settings"
-  element={
-    <ProtectedRoute>
-
-      <div className="flex">
-
-        <Sidebar />
-
-        <div className="flex-1 bg-gray-100 min-h-screen p-6">
-
-          <Settings />
-
-        </div>
-
-      </div>
-
-    </ProtectedRoute>
-  }
-/>
-
+        path="/settings"
+        element={
+          <ProtectedRoute>
+            <div className="flex">
+              <Sidebar />
+              <div className="flex-1 bg-gray-50 dark:bg-gray-950 min-h-screen">
+                <Settings />
+              </div>
+            </div>
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/"
         element={
-
           <ProtectedRoute>
-
-            <div className="flex">
-
-              <Sidebar />
-
-              <div className="flex-1 p-10 bg-gray-100 min-h-screen">
-
-                <h1 className="text-5xl font-bold mb-10">
-                  Dashboard
-                </h1>
-
-                <div className="grid grid-cols-4 gap-6">
-
-                  <StatsCard
-                    title="Total Vehicles"
-                    value={total}
-                    color="bg-blue-500"
-                  />
-
-                  <StatsCard
-                    title="Expired"
-                    value={expired}
-                    color="bg-red-500"
-                  />
-
-                  <StatsCard
-                    title="Expiring Soon"
-                    value={expiring}
-                    color="bg-orange-500"
-                  />
-
-                  <StatsCard
-                    title="Active"
-                    value={active}
-                    color="bg-green-500"
-                  />
-
-                </div>
-
-
-
-              </div>
-
-            </div>
-
+            <Dashboard />
           </ProtectedRoute>
-
         }
       />
       <Route
-  path="/deleted"
-  element={
-    <ProtectedRoute>
-
-      <div className="flex">
-
-        <Sidebar />
-
-        <div className="flex-1 bg-gray-100 min-h-screen p-6">
-
-          <DeletedVehicles />
-
-        </div>
-
-      </div>
-
-    </ProtectedRoute>
-  }
-/>
+        path="/deleted"
+        element={
+          <ProtectedRoute>
+            <div className="flex">
+              <Sidebar />
+              <div className="flex-1 bg-gray-50 dark:bg-gray-950 min-h-screen">
+                <DeletedVehicles />
+              </div>
+            </div>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/notifications"
+        element={
+          <ProtectedRoute>
+            <div className="flex">
+              <Sidebar />
+              <div className="flex-1 bg-gray-50 dark:bg-gray-950 min-h-screen">
+                <Notifications />
+              </div>
+            </div>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/deleted-users"
+        element={
+          <ProtectedRoute>
+            <div className="flex">
+              <Sidebar />
+              <div className="flex-1 bg-gray-50 dark:bg-gray-950 min-h-screen">
+                <DeletedUsers />
+              </div>
+            </div>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/requests"
+        element={
+          <ProtectedRoute>
+            <div className="flex">
+              <Sidebar />
+              <div className="flex-1 bg-gray-50 dark:bg-gray-950 min-h-screen">
+                <Requests />
+              </div>
+            </div>
+          </ProtectedRoute>
+        }
+      />
     </Routes>
-
-
+    </Suspense>
   );
-
 }
 
 export default App;

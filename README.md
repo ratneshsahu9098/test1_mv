@@ -90,6 +90,7 @@ npm run dev
 - Cloud Deployment
 - Mobile Responsive UI
 
+
 ---
 
 ## 👨‍💻 Developer
@@ -100,3 +101,19 @@ Ratnesh Sahu
 AI & Full Stack Developer
 
 Built with React, Flask, and OpenAI-assisted development.
+---
+
+## Environment Variables
+
+Backend:
+
+```bash
+copy .env.example .env
+```
+
+Frontend:
+
+```bash
+cd mv-tax-frontend
+copy .env.example .env
+```

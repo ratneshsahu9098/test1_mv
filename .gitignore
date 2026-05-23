@@ -19,12 +19,18 @@ dist/
 
 # Logs
 *.log
+data/logs.txt
+PyWhatKit_DB.txt
 
 # Build
 build/
+
+# Generated artifacts
+vehicle_report.pdf
 
 # OS files
 .DS_Store
 Thumbs.db
 *.xlsx
 *.png
+firebase-service-account.json

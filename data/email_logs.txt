@@ -1,0 +1,16 @@
+2026-05-22 22:39:11.693643 | movie.7p@gmail.com | Expired: Vehicle MH40CT1182 tax expired 85 day(s) ago | sent
+2026-05-22 22:39:34.016708 | movie.7p@gmail.com | Expired: Vehicle MH40CT1182 tax expired 85 day(s) ago | sent
+2026-05-23 07:21:15.538858 | movie.7p@gmail.com | Expired: Vehicle MH40CT1182 tax expired 86 day(s) ago | failed: [Errno 11001] getaddrinfo failed
+2026-05-23 07:21:31.920185 | movie.7p@gmail.com | Expired: Vehicle MH40CT1182 tax expired 86 day(s) ago | failed: [Errno 11001] getaddrinfo failed
+2026-05-23 07:23:21.273394 | movie.7p@gmail.com | Expired: Vehicle MH40CT1172 tax expired 2 day(s) ago | sent
+2026-05-23 07:24:47.766492 | movie.7p@gmail.com | Expired: Vehicle MH40CT1182 tax expired 86 day(s) ago | sent
+2026-05-23 07:34:23.613230 | movie.7p@gmail.com | Expired: Vehicle MH40CT1182 tax expired 86 day(s) ago | sent
+2026-05-23 07:34:29.771169 | movie.7p@gmail.com | Expired: Vehicle MH40CT1182 tax expired 86 day(s) ago | sent
+2026-05-23 07:39:39.201155 | movie.7p@gmail.com | Expired: Vehicle MH40CT1182 tax expired 86 day(s) ago | sent
+2026-05-23 07:39:56.076065 | movie.7p@gmail.com | Expired: Vehicle MH40CT1182 tax expired 86 day(s) ago | sent
+2026-05-23 07:49:40.285210 | movie.7p@gmail.com | Expired: Vehicle MH40CT1182 tax expired 86 day(s) ago | sent
+2026-05-23 07:49:56.638476 | movie.7p@gmail.com | Expired: Vehicle MH40CT1182 tax expired 86 day(s) ago | sent
+2026-05-23 08:00:16.619786 | movie.7p@gmail.com | Expired: Vehicle MH40CT1182 tax expired 86 day(s) ago | sent
+2026-05-23 08:00:24.888445 | movie.7p@gmail.com | Expired: Vehicle MH40CT1182 tax expired 86 day(s) ago | sent
+2026-05-23 08:01:19.368164 | movie.7p@gmail.com | Expired: Vehicle MH40CT1182 tax expired 86 day(s) ago | sent
+2026-05-23 08:01:47.531121 | movie.7p@gmail.com | Expired: Vehicle MH40CT1182 tax expired 86 day(s) ago | sent
