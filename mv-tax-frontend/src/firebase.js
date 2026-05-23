@@ -6,15 +6,25 @@ const firebaseConfig = {
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "766664836702",
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
-const app = initializeApp(firebaseConfig);
-const messaging = getMessaging(app);
+let app = null;
+let messaging = null;
+
+try {
+  if (firebaseConfig.apiKey && firebaseConfig.projectId) {
+    app = initializeApp(firebaseConfig);
+    messaging = getMessaging(app);
+  }
+} catch (e) {
+  console.warn("Firebase init skipped:", e);
+}
 
 export async function requestNotificationPermission() {
+  if (!messaging) return null;
   try {
     const permission = await Notification.requestPermission();
     if (permission === "granted") {
@@ -34,6 +44,7 @@ export async function requestNotificationPermission() {
 }
 
 export function onForegroundMessage(callback) {
+  if (!messaging) return;
   return onMessage(messaging, (payload) => {
     callback(payload);
   });
