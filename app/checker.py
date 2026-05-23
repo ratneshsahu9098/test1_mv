@@ -28,12 +28,15 @@ def check_expiry():
     """)
     rows = cur.fetchall()
 
-    cur.execute("SELECT username, token FROM fcm_tokens")
     fcm_map = {}
-    for row in cur.fetchall():
-        uname = row["username"]
-        token = row["token"]
-        fcm_map.setdefault(uname, []).append(token)
+    try:
+        cur.execute("SELECT username, token FROM fcm_tokens")
+        for row in cur.fetchall():
+            uname = row["username"]
+            token = row["token"]
+            fcm_map.setdefault(uname, []).append(token)
+    except Exception:
+        pass
 
     conn.close()
 

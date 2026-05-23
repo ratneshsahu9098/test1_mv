@@ -71,14 +71,20 @@ CREATE TABLE IF NOT EXISTS users (
 
 # Ensure subscription columns exist (safe migration)
 try:
-    cur.execute("ALTER TABLE users ADD COLUMN subscription_status TEXT DEFAULT 'free'")
+    cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_status TEXT DEFAULT 'free'")
 except Exception:
-    pass
+    try:
+        conn.rollback()
+    except Exception:
+        pass
 
 try:
-    cur.execute("ALTER TABLE users ADD COLUMN subscription_expiry TEXT")
+    cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_expiry TEXT")
 except Exception:
-    pass
+    try:
+        conn.rollback()
+    except Exception:
+        pass
 
 # DEFAULT ADMIN
 cur.execute(
@@ -214,16 +220,32 @@ CREATE TABLE IF NOT EXISTS reset_tokens (
 )
 """)
 
+# FCM TOKENS TABLE (push notifications)
+cur.execute("""
+CREATE TABLE IF NOT EXISTS fcm_tokens (
+    id SERIAL PRIMARY KEY,
+    username TEXT,
+    token TEXT UNIQUE,
+    created_at TEXT
+)
+""")
+
 # Ensure notification columns exist on vehicles (safe migration)
 try:
-    cur.execute("ALTER TABLE vehicles ADD COLUMN email TEXT")
+    cur.execute("ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS email TEXT")
 except Exception:
-    pass
+    try:
+        conn.rollback()
+    except Exception:
+        pass
 
 try:
-    cur.execute("ALTER TABLE vehicles ADD COLUMN notification_enabled INTEGER DEFAULT 1")
+    cur.execute("ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS notification_enabled INTEGER DEFAULT 1")
 except Exception:
-    pass
+    try:
+        conn.rollback()
+    except Exception:
+        pass
 
 # Database indexes for performance
 try:
@@ -235,7 +257,10 @@ try:
     cur.execute("CREATE INDEX IF NOT EXISTS idx_vehicle_history_vehicle_id ON vehicle_history(vehicle_id)")
     cur.execute("CREATE INDEX IF NOT EXISTS idx_payments_user_id ON payments(user_id)")
 except Exception:
-    pass
+    try:
+        conn.rollback()
+    except Exception:
+        pass
 
 conn.commit()
 conn.close()
