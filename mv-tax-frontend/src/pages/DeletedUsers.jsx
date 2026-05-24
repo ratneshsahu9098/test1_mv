@@ -59,10 +59,10 @@ function DeletedUsers() {
           <thead>
             <tr className="border-b border-gray-200 dark:border-gray-800">
               <th className="p-3 text-left text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider">Username</th>
-              <th className="p-3 text-left text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider">Email</th>
-              <th className="p-3 text-left text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider">Phone</th>
-              <th className="p-3 text-left text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider">Role</th>
-              <th className="p-3 text-left text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider">Deleted At</th>
+              <th className="p-3 text-left text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider hidden sm:table-cell">Email</th>
+              <th className="p-3 text-left text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider hidden md:table-cell">Phone</th>
+              <th className="p-3 text-left text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider hidden sm:table-cell">Role</th>
+              <th className="p-3 text-left text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider hidden md:table-cell">Deleted At</th>
               <th className="p-3 text-left text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
@@ -78,10 +78,10 @@ function DeletedUsers() {
             ) : (
               users.map((user) => (
                 <tr key={user.id} className="border-b border-gray-200 dark:border-gray-800/50 hover:bg-gray-100/30 dark:hover:bg-gray-800/30 transition-colors">
-                  <td className="p-3 font-medium text-gray-900 dark:text-white">{user.username}</td>
-                  <td className="p-3 text-gray-500 dark:text-gray-400">{user.email || "-"}</td>
-                  <td className="p-3 text-gray-500 dark:text-gray-400">{user.phone || "-"}</td>
-                  <td className="p-3">
+              <td className="p-3 font-medium text-gray-900 dark:text-white">{user.username}</td>
+                  <td className="p-3 text-gray-500 dark:text-gray-400 hidden sm:table-cell">{user.email || "-"}</td>
+                  <td className="p-3 text-gray-500 dark:text-gray-400 hidden md:table-cell">{user.phone || "-"}</td>
+                  <td className="p-3 hidden sm:table-cell">
                     <span className={`font-medium ${
                       user.role === "admin" ? "text-purple-400" :
                       user.role === "staff" ? "text-blue-400" : "text-gray-500 dark:text-gray-400"
@@ -89,12 +89,12 @@ function DeletedUsers() {
                       {user.role}
                     </span>
                   </td>
-                  <td className="p-3 text-gray-500 dark:text-gray-400">{user.deleted_at}</td>
+                  <td className="p-3 text-gray-500 dark:text-gray-400 hidden md:table-cell">{user.deleted_at}</td>
                   <td className="p-3">
                     <button
                       onClick={() => restoreUser(user.id)}
                       disabled={actionId === user.id}
-                      className="bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all"
+                      className="bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white px-4 py-2 min-h-[44px] rounded-lg text-sm font-medium transition-all"
                     >
                       {actionId === user.id ? "Restoring..." : "Restore"}
                     </button>

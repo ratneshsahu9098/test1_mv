@@ -8,6 +8,8 @@ from app.email_templates import (
     build_reminder_html,
     build_expired_html,
     build_monthly_summary_html,
+    build_password_reset_request_html,
+    build_password_reset_resolved_html,
 )
 
 LOG_FILE = "data/email_logs.txt"
@@ -50,6 +52,18 @@ def send_reminder_email(to_email: str, vehicle_number: str, owner: str, expiry_d
 def send_expired_email(to_email: str, vehicle_number: str, owner: str, expiry_date: str, days_ago: int):
     subject = f"Expired: Vehicle {vehicle_number} tax expired {days_ago} day(s) ago"
     html = build_expired_html(vehicle_number, owner, expiry_date, days_ago)
+    return send_email(to_email, subject, html)
+
+
+def send_password_reset_request_notification(to_email: str, username: str):
+    subject = f"Password Reset Request from {username}"
+    html = build_password_reset_request_html(username)
+    return send_email(to_email, subject, html)
+
+
+def send_password_reset_resolved_notification(to_email: str, reset_link: str):
+    subject = "Your Password Reset Request Has Been Approved"
+    html = build_password_reset_resolved_html(reset_link)
     return send_email(to_email, subject, html)
 
 

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom/client";
 import { Toaster } from "react-hot-toast";
 import {
@@ -27,6 +27,22 @@ axios.interceptors.response.use(
 
 setupNotifications();
 
+function ResponsiveToaster() {
+  const [position, setPosition] = useState(
+    window.innerWidth < 640 ? "bottom-center" : "top-right"
+  );
+
+  useEffect(() => {
+    const handleResize = () => {
+      setPosition(window.innerWidth < 640 ? "bottom-center" : "top-right");
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  return <Toaster position={position} reverseOrder={false} />;
+}
+
 ReactDOM.createRoot(
   document.getElementById("root")
 ).render(
@@ -36,10 +52,7 @@ ReactDOM.createRoot(
     <BrowserRouter>
 
       <ThemeProvider><App /></ThemeProvider>
-      <Toaster
-        position="top-right"
-        reverseOrder={false}
-      />
+      <ResponsiveToaster />
 
     </BrowserRouter>
 

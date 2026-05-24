@@ -1,12 +1,13 @@
 import {
-    useState
+    useState,
+    useEffect
 } from "react";
 
 import toast from "react-hot-toast";
 import EditVehicleModal from "./EditVehicleModal";
 import axios from "axios";
 import API_URL from "../config";
-import { Lock } from "lucide-react";
+import { Lock, MoreVertical } from "lucide-react";
 import HistoryModal from "./HistoryModal";
 import FetchModal from "./FetchModal";
 
@@ -44,6 +45,20 @@ function VehicleTable({
         useState(null);
     const [sendingPush, setSendingPush] =
         useState(null);
+
+    const [openMenuId, setOpenMenuId] =
+        useState(null);
+
+    useEffect(() => {
+        if (!openMenuId) return;
+        const handleClick = () => setOpenMenuId(null);
+        document.addEventListener("mousedown", handleClick);
+        document.addEventListener("touchstart", handleClick);
+        return () => {
+            document.removeEventListener("mousedown", handleClick);
+            document.removeEventListener("touchstart", handleClick);
+        };
+    }, [openMenuId]);
 
     const sendEmailReminder = async (vehicle) => {
         try {
@@ -186,12 +201,12 @@ function VehicleTable({
                         <tr className="border-b border-gray-200 dark:border-gray-800">
                             <th className="text-left p-3 text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider">Vehicle</th>
                             <th className="text-left p-3 text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider">Owner</th>
-                            <th className="text-left p-3 text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider">VAHAN Owner</th>
-                            <th className="text-left p-3 text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider">Added By</th>
-                            <th className="text-left p-3 text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider">Email</th>
-                            <th className="text-left p-3 text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider">Chassis</th>
+                            <th className="text-left p-3 text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider hidden lg:table-cell">VAHAN Owner</th>
+                            <th className="text-left p-3 text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider hidden lg:table-cell">Added By</th>
+                            <th className="text-left p-3 text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider hidden md:table-cell">Email</th>
+                            <th className="text-left p-3 text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider hidden md:table-cell">Chassis</th>
                             <th className="text-left p-3 text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider">Expiry</th>
-                            <th className="text-left p-3 text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider">Status</th>
+                            <th className="text-left p-3 text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider hidden sm:table-cell">Status</th>
                             <th className="text-left p-3 text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
@@ -205,32 +220,32 @@ function VehicleTable({
                         ) : (
                             vehicles.map((vehicle) => (
                                 <tr key={vehicle.id} className="border-b border-gray-200 dark:border-gray-800/50 hover:bg-gray-100/30 dark:hover:bg-gray-800/30 transition-colors">
-                                    <td className="p-3 font-semibold text-gray-900 dark:text-white">{vehicle.vehicle_number}</td>
-                                    <td className="p-3 text-gray-700 dark:text-gray-300">{vehicle.owner}</td>
-                                    <td className="p-3 text-gray-500 dark:text-gray-400">{vehicle.vahan_owner_name || "-"}</td>
-                                    <td className="p-3 text-gray-500 dark:text-gray-400">{vehicle.added_by || "-"}</td>
-                                    <td className="p-3 text-gray-500 dark:text-gray-400 max-w-[160px] truncate">{vehicle.email || "-"}</td>
-                                    <td className="p-3 text-gray-700 dark:text-gray-300 font-mono">{vehicle.chassis_last5}</td>
-                                    <td className="p-3 text-gray-700 dark:text-gray-300">{vehicle.expiry_date}</td>
-                                    <td className="p-3">{statusBadge(vehicle.expiry_date)}</td>
+                                    <td className="p-3 font-semibold text-gray-900 dark:text-white whitespace-nowrap max-w-[120px] sm:max-w-none truncate">{vehicle.vehicle_number}</td>
+                                    <td className="p-3 text-gray-700 dark:text-gray-300 whitespace-nowrap max-w-[100px] sm:max-w-none truncate">{vehicle.owner}</td>
+                                    <td className="p-3 text-gray-500 dark:text-gray-400 hidden lg:table-cell">{vehicle.vahan_owner_name || "-"}</td>
+                                    <td className="p-3 text-gray-500 dark:text-gray-400 hidden lg:table-cell">{vehicle.added_by || "-"}</td>
+                                    <td className="p-3 text-gray-500 dark:text-gray-400 max-w-[160px] truncate hidden md:table-cell">{vehicle.email || "-"}</td>
+                                    <td className="p-3 text-gray-700 dark:text-gray-300 font-mono hidden md:table-cell">{vehicle.chassis_last5}</td>
+                                    <td className="p-3 text-gray-700 dark:text-gray-300 whitespace-nowrap">{vehicle.expiry_date}</td>
+                                    <td className="p-3 hidden sm:table-cell">{statusBadge(vehicle.expiry_date)}</td>
                                     <td className="p-3">
-                                        <div className="flex gap-2 flex-wrap min-w-[320px]">
+                                        <div className="hidden sm:flex gap-1.5 flex-wrap">
                                             {role !== "viewer" ? (
                                                 <button
                                                     onClick={() => fetchVehicleInfo(vehicle.vehicle_number)}
                                                     disabled={loadingFetch === vehicle.vehicle_number}
-                                                    className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50 transition-all"
+                                                    className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 min-h-[44px] rounded-lg text-sm font-medium disabled:opacity-50 transition-all"
                                                 >
                                                     {loadingFetch === vehicle.vehicle_number ? "Fetching..." : "Fetch"}
                                                 </button>
                                             ) : (
-                                                <span className="bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 px-3 py-1.5 rounded-lg text-sm cursor-not-allowed inline-flex items-center gap-1.5"><Lock size={14} /> Fetch</span>
+                                                <span className="bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 px-3 py-2 min-h-[44px] rounded-lg text-sm cursor-not-allowed inline-flex items-center gap-1.5"><Lock size={14} /> Fetch</span>
                                             )}
                                             {role !== "viewer" && (vehicle.email || localStorage.getItem("email")) ? (
                                                 <button
                                                     onClick={() => sendEmailReminder(vehicle)}
                                                     disabled={sendingEmail === vehicle.id}
-                                                    className="bg-orange-600 hover:bg-orange-700 text-white px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50 transition-all"
+                                                    className="bg-orange-600 hover:bg-orange-700 text-white px-3 py-2 min-h-[44px] rounded-lg text-sm font-medium disabled:opacity-50 transition-all"
                                                 >
                                                     {sendingEmail === vehicle.id ? "..." : "Mail"}
                                                 </button>
@@ -239,7 +254,7 @@ function VehicleTable({
                                                 <button
                                                     onClick={() => sendPushReminder(vehicle)}
                                                     disabled={sendingPush === vehicle.id}
-                                                    className="bg-sky-600 hover:bg-sky-700 text-white px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50 transition-all"
+                                                    className="bg-sky-600 hover:bg-sky-700 text-white px-3 py-2 min-h-[44px] rounded-lg text-sm font-medium disabled:opacity-50 transition-all"
                                                 >
                                                     {sendingPush === vehicle.id ? "..." : "Push"}
                                                 </button>
@@ -247,16 +262,16 @@ function VehicleTable({
                                             {role !== "viewer" ? (
                                                 <button
                                                     onClick={() => openEditModal(vehicle)}
-                                                    className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-all"
+                                                    className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 min-h-[44px] rounded-lg text-sm font-medium transition-all"
                                                 >
                                                     Edit
                                                 </button>
                                             ) : (
-                                                <span className="bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 px-3 py-1.5 rounded-lg text-sm cursor-not-allowed inline-flex items-center gap-1.5"><Lock size={14} /> Edit</span>
+                                                <span className="bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 px-3 py-2 min-h-[44px] rounded-lg text-sm cursor-not-allowed inline-flex items-center gap-1.5"><Lock size={14} /> Edit</span>
                                             )}
                                             <button
                                                 onClick={() => openHistoryModal(vehicle.id)}
-                                                className="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-all"
+                                                className="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-white px-3 py-2 min-h-[44px] rounded-lg text-sm font-medium transition-all"
                                             >
                                                 History
                                             </button>
@@ -264,7 +279,7 @@ function VehicleTable({
                                                 <button
                                                     onClick={() => deleteVehicle(vehicle.id)}
                                                     disabled={loadingDelete === vehicle.id}
-                                                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50 transition-all"
+                                                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 min-h-[44px] rounded-lg text-sm font-medium disabled:opacity-50 transition-all"
                                                 >
                                                     {loadingDelete === vehicle.id ? "..." : "Delete"}
                                                 </button>
@@ -276,13 +291,97 @@ function VehicleTable({
                                                         const whatsappUrl = `https://wa.me/91${vehicle.phone}?text=${encodeURIComponent(message)}`;
                                                         window.open(whatsappUrl, "_blank");
                                                     }}
-                                                    className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-all"
+                                                    className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 min-h-[44px] rounded-lg text-sm font-medium transition-all"
                                                 >
                                                     WhatsApp
                                                 </button>
                                             ) : (
-                                                <span className="bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 px-3 py-1.5 rounded-lg text-sm cursor-not-allowed inline-flex items-center gap-1.5"><Lock size={14} /> WhatsApp</span>
+                                                <span className="bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 px-3 py-2 min-h-[44px] rounded-lg text-sm cursor-not-allowed inline-flex items-center gap-1.5"><Lock size={14} /> WhatsApp</span>
                                             )}
+                                        </div>
+
+                                        <div className="flex sm:hidden gap-1.5 flex-wrap">
+                                            <button
+                                                onClick={() => openEditModal(vehicle)}
+                                                className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 min-h-[44px] rounded-lg text-sm font-medium transition-all"
+                                            >
+                                                Edit
+                                            </button>
+                                            <button
+                                                onClick={() => openHistoryModal(vehicle.id)}
+                                                className="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-white px-3 py-2 min-h-[44px] rounded-lg text-sm font-medium transition-all"
+                                            >
+                                                History
+                                            </button>
+                                            <div className="relative">
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        e.nativeEvent?.stopImmediatePropagation?.();
+                                                        setOpenMenuId(openMenuId === vehicle.id ? null : vehicle.id);
+                                                    }}
+                                                    className="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-white px-3 py-2 min-h-[44px] rounded-lg text-sm font-medium transition-all"
+                                                >
+                                                    <MoreVertical size={18} />
+                                                </button>
+                                                {openMenuId === vehicle.id && (
+                                                    <div className="absolute right-0 top-full mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl py-2 min-w-[150px]">
+                                                        {role !== "viewer" && (
+                                                            <>
+                                                                <button
+                                                                    onClick={() => { fetchVehicleInfo(vehicle.vehicle_number); setOpenMenuId(null); }}
+                                                                    disabled={loadingFetch === vehicle.vehicle_number}
+                                                                    className="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all flex items-center gap-2"
+                                                                >
+                                                                    <span className="w-2 h-2 rounded-full bg-purple-500" />
+                                                                    {loadingFetch === vehicle.vehicle_number ? "Fetching..." : "Fetch"}
+                                                                </button>
+                                                                {(vehicle.email || localStorage.getItem("email")) && (
+                                                                    <button
+                                                                        onClick={() => { sendEmailReminder(vehicle); setOpenMenuId(null); }}
+                                                                        disabled={sendingEmail === vehicle.id}
+                                                                        className="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all flex items-center gap-2"
+                                                                    >
+                                                                        <span className="w-2 h-2 rounded-full bg-orange-500" />
+                                                                        {sendingEmail === vehicle.id ? "..." : "Mail"}
+                                                                    </button>
+                                                                )}
+                                                                {localStorage.getItem("fcm_token") && (
+                                                                    <button
+                                                                        onClick={() => { sendPushReminder(vehicle); setOpenMenuId(null); }}
+                                                                        disabled={sendingPush === vehicle.id}
+                                                                        className="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all flex items-center gap-2"
+                                                                    >
+                                                                        <span className="w-2 h-2 rounded-full bg-sky-500" />
+                                                                        {sendingPush === vehicle.id ? "..." : "Push"}
+                                                                    </button>
+                                                                )}
+                                                                <button
+                                                                    onClick={() => {
+                                                                        const message = `🚗 MV Tax Reminder\n\nVehicle: ${vehicle.vehicle_number}\nExpiry: ${vehicle.expiry_date}\nPlease renew your vehicle tax on time.\n- MV Tax`;
+                                                                        window.open(`https://wa.me/91${vehicle.phone}?text=${encodeURIComponent(message)}`, "_blank");
+                                                                        setOpenMenuId(null);
+                                                                    }}
+                                                                    className="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all flex items-center gap-2"
+                                                                >
+                                                                    <span className="w-2 h-2 rounded-full bg-green-500" />
+                                                                    WhatsApp
+                                                                </button>
+                                                                {role === "admin" && (
+                                                                    <button
+                                                                        onClick={() => { deleteVehicle(vehicle.id); setOpenMenuId(null); }}
+                                                                        disabled={loadingDelete === vehicle.id}
+                                                                        className="w-full text-left px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all flex items-center gap-2"
+                                                                    >
+                                                                        <span className="w-2 h-2 rounded-full bg-red-500" />
+                                                                        {loadingDelete === vehicle.id ? "..." : "Delete"}
+                                                                    </button>
+                                                                )}
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                     </td>
                                 </tr>

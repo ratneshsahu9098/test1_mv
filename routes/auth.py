@@ -174,8 +174,18 @@ def forgot_password():
         "INSERT INTO requests (user_id, username, title, description, status, created_at) VALUES (%s, %s, %s, %s, 'pending', %s)",
         (user["id"], username, "Password Reset Request", f"Username: {username}\n\nI forgot my password. Please approve a password reset.", now),
     )
+
+    cur.execute("SELECT email FROM users WHERE role='admin' AND email IS NOT NULL AND email != ''")
+    admin_row = cur.fetchone()
     conn.commit()
     conn.close()
+
+    if admin_row and admin_row["email"]:
+        try:
+            from app.email_sender import send_password_reset_request_notification
+            send_password_reset_request_notification(admin_row["email"], username)
+        except Exception as e:
+            print(f"Failed to notify admin: {e}")
 
     return jsonify({"message": "Reset request sent to admin for approval"})
 

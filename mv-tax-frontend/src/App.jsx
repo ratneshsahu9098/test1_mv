@@ -34,7 +34,7 @@ function App() {
           <ProtectedRoute>
             <div className="flex">
               <Sidebar />
-              <div className="flex-1 bg-gray-50 dark:bg-gray-950 min-h-screen">
+              <div className="flex-1 bg-gray-50 dark:bg-gray-950 min-h-screen lg:pl-0 pl-16">
                 <Vehicles />
               </div>
             </div>
@@ -56,7 +56,7 @@ function App() {
           <ProtectedRoute>
             <div className="flex">
               <Sidebar />
-              <div className="flex-1 bg-gray-50 dark:bg-gray-950 min-h-screen">
+              <div className="flex-1 bg-gray-50 dark:bg-gray-950 min-h-screen lg:pl-0 pl-16">
                 <Users />
               </div>
             </div>
@@ -69,7 +69,7 @@ function App() {
           <ProtectedRoute>
             <div className="flex">
               <Sidebar />
-              <div className="flex-1 bg-gray-50 dark:bg-gray-950 min-h-screen">
+              <div className="flex-1 bg-gray-50 dark:bg-gray-950 min-h-screen lg:pl-0 pl-16">
                 <Settings />
               </div>
             </div>
@@ -90,7 +90,7 @@ function App() {
           <ProtectedRoute>
             <div className="flex">
               <Sidebar />
-              <div className="flex-1 bg-gray-50 dark:bg-gray-950 min-h-screen">
+              <div className="flex-1 bg-gray-50 dark:bg-gray-950 min-h-screen lg:pl-0 pl-16">
                 <DeletedVehicles />
               </div>
             </div>
@@ -103,7 +103,7 @@ function App() {
           <ProtectedRoute>
             <div className="flex">
               <Sidebar />
-              <div className="flex-1 bg-gray-50 dark:bg-gray-950 min-h-screen">
+              <div className="flex-1 bg-gray-50 dark:bg-gray-950 min-h-screen lg:pl-0 pl-16">
                 <Notifications />
               </div>
             </div>
@@ -116,7 +116,7 @@ function App() {
           <ProtectedRoute>
             <div className="flex">
               <Sidebar />
-              <div className="flex-1 bg-gray-50 dark:bg-gray-950 min-h-screen">
+              <div className="flex-1 bg-gray-50 dark:bg-gray-950 min-h-screen lg:pl-0 pl-16">
                 <DeletedUsers />
               </div>
             </div>
@@ -129,7 +129,7 @@ function App() {
           <ProtectedRoute>
             <div className="flex">
               <Sidebar />
-              <div className="flex-1 bg-gray-50 dark:bg-gray-950 min-h-screen">
+              <div className="flex-1 bg-gray-50 dark:bg-gray-950 min-h-screen lg:pl-0 pl-16">
                 <Requests />
               </div>
             </div>

@@ -12,7 +12,7 @@ function HistoryModal({
           <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Vehicle History</h2>
           <button
             onClick={onClose}
-            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-all text-sm"
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 min-h-[44px] rounded-lg font-medium transition-all text-sm"
           >
             Close
           </button>
@@ -25,7 +25,7 @@ function HistoryModal({
               <th className="text-left p-3 text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider">Vehicle</th>
               <th className="text-left p-3 text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider">Owner</th>
               <th className="text-left p-3 text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider">Expiry</th>
-              <th className="text-left p-3 text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider">Updated At</th>
+              <th className="text-left p-3 text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider hidden sm:table-cell">Updated At</th>
             </tr>
           </thead>
           <tbody>
@@ -39,7 +39,7 @@ function HistoryModal({
                   <td className="p-3 text-gray-900 dark:text-white font-medium">{item.vehicle_number}</td>
                   <td className="p-3 text-gray-700 dark:text-gray-300">{item.owner}</td>
                   <td className="p-3 text-gray-700 dark:text-gray-300">{item.expiry_date}</td>
-                  <td className="p-3 text-gray-500 dark:text-gray-400">{item.edited_at}</td>
+                  <td className="p-3 text-gray-500 dark:text-gray-400 hidden sm:table-cell">{item.edited_at}</td>
                 </tr>
               ))
             )}

@@ -39,7 +39,7 @@ function Notifications() {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
         <div>
           <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white">Notifications</h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">Recent reminder alerts sent from the system</p>
@@ -48,7 +48,7 @@ function Notifications() {
           whileHover={{ scale: 1.02 }}
           onClick={fetchLogs}
           disabled={loading}
-          className="bg-gray-800 text-gray-300 px-4 py-2 rounded-xl text-sm hover:bg-gray-700 transition-all disabled:opacity-50"
+          className="bg-gray-800 text-gray-300 px-5 py-2.5 min-h-[44px] rounded-xl text-sm hover:bg-gray-700 transition-all disabled:opacity-50"
         >
           {loading ? "Refreshing..." : "Refresh"}
         </motion.button>

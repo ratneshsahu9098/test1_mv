@@ -256,35 +256,35 @@ function Users() {
             </button>
 
             <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border border-gray-200 dark:border-gray-800 rounded-2xl shadow-xl p-6 overflow-x-auto">
-                <table className="w-full min-w-[1200px]">
+                <table className="w-full">
                     <thead>
                         <tr className="border-b border-gray-200 dark:border-gray-800">
-                            <th className="p-3 text-left text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider">ID</th>
+                            <th className="p-3 text-left text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider hidden md:table-cell">ID</th>
                             <th className="p-3 text-left text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider">Username</th>
-                            <th className="p-3 text-left text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider">Email</th>
-                            <th className="p-3 text-left text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider">Mobile</th>
+                            <th className="p-3 text-left text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider hidden lg:table-cell">Email</th>
+                            <th className="p-3 text-left text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider hidden lg:table-cell">Mobile</th>
                             <th className="p-3 text-left text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider">Vehicles</th>
-                            <th className="p-3 text-left text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider">Plan</th>
-                            <th className="p-3 text-left text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider">Expiry</th>
-                            <th className="p-3 text-left text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider">Status</th>
-                            <th className="p-3 text-left text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider">Role Control</th>
-                            <th className="p-3 text-left text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider">Subscription</th>
+                            <th className="p-3 text-left text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider hidden sm:table-cell">Plan</th>
+                            <th className="p-3 text-left text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider hidden lg:table-cell">Expiry</th>
+                            <th className="p-3 text-left text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider hidden sm:table-cell">Status</th>
+                            <th className="p-3 text-left text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider hidden md:table-cell">Role Control</th>
+                            <th className="p-3 text-left text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider hidden lg:table-cell">Subscription</th>
                             <th className="p-3 text-left text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {users.map((user) => (
                             <tr key={user.id} className="border-b border-gray-200 dark:border-gray-800/50 hover:bg-gray-100/30 dark:hover:bg-gray-800/30 transition-colors">
-                                <td className="p-3 text-gray-700 dark:text-gray-300">{user.id}</td>
+                                <td className="p-3 text-gray-700 dark:text-gray-300 hidden md:table-cell">{user.id}</td>
                                 <td className="p-3 text-gray-900 dark:text-white font-medium">{user.username}</td>
-                                <td className="p-3 text-gray-500 dark:text-gray-400">{user.email || "-"}</td>
-                                <td className="p-3 text-gray-500 dark:text-gray-400">{user.phone || "-"}</td>
+                                <td className="p-3 text-gray-500 dark:text-gray-400 hidden lg:table-cell">{user.email || "-"}</td>
+                                <td className="p-3 text-gray-500 dark:text-gray-400 hidden lg:table-cell">{user.phone || "-"}</td>
                                 <td className="p-3">
                                     <span className="bg-blue-500/10 text-blue-400 px-3 py-1 rounded-full text-sm font-medium">
                                         {user.vehicle_count ?? 0}
                                     </span>
                                 </td>
-                                <td className="p-3">
+                                <td className="p-3 hidden sm:table-cell">
                                     <span className={`font-medium ${
                                         user.role === "admin" ? "text-purple-400" :
                                         user.role === "staff" ? "text-blue-400" : "text-gray-400"
@@ -292,15 +292,15 @@ function Users() {
                                         {user.role === "viewer" ? "Free" : user.role === "staff" ? "Staff Pro" : "Admin"}
                                     </span>
                                 </td>
-                                <td className="p-3 text-gray-400">{user.subscription_expiry || "-"}</td>
-                                <td className="p-3">
+                                <td className="p-3 text-gray-400 hidden lg:table-cell">{user.subscription_expiry || "-"}</td>
+                                <td className="p-3 hidden sm:table-cell">
                                     {user.subscription_status === "active" ? (
                                         <span className="text-green-400 font-medium bg-green-500/10 px-3 py-1 rounded-full text-sm">Active</span>
                                     ) : (
                                         <span className="text-gray-400 dark:text-gray-500 bg-gray-200/50 dark:bg-gray-700/50 px-3 py-1 rounded-full text-sm">Free</span>
                                     )}
                                 </td>
-                                <td className="p-3">
+                                <td className="p-3 hidden md:table-cell">
                                     <select
                                         value={user.role}
                                         disabled={user.username === "admin"}
@@ -311,26 +311,26 @@ function Users() {
                                         <option value="viewer">Viewer</option>
                                     </select>
                                 </td>
-                                <td className="p-3">
+                                <td className="p-3 hidden lg:table-cell">
                                     <div className="flex gap-2 flex-wrap">
                                         <button
                                             disabled={user.username === "admin"}
                                             onClick={() => handleSubscriptionAction(user.id, "upgrade")}
-                                            className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-all"
+                                            className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-3 py-2 min-h-[44px] rounded-lg text-sm font-medium transition-all"
                                         >
                                             Upgrade
                                         </button>
                                         <button
                                             disabled={user.username === "admin"}
                                             onClick={() => handleSubscriptionAction(user.id, "extend")}
-                                            className="bg-yellow-600 hover:bg-yellow-700 disabled:opacity-50 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-all"
+                                            className="bg-yellow-600 hover:bg-yellow-700 disabled:opacity-50 text-white px-3 py-2 min-h-[44px] rounded-lg text-sm font-medium transition-all"
                                         >
                                             Extend
                                         </button>
                                         <button
                                             disabled={user.username === "admin"}
                                             onClick={() => handleSubscriptionAction(user.id, "downgrade")}
-                                            className="bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-all"
+                                            className="bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white px-3 py-2 min-h-[44px] rounded-lg text-sm font-medium transition-all"
                                         >
                                             Down
                                         </button>
@@ -338,7 +338,7 @@ function Users() {
                                 </td>
                                 <td className="p-3">
                                     {user.username !== "admin" && (
-                                        <div className="flex gap-2">
+                                        <div className="flex gap-1.5 flex-wrap">
                                             <button
                                                 onClick={() => {
                                                     setEditUserId(user.id);
@@ -347,19 +347,19 @@ function Users() {
                                                     setEditEmail(user.email || "");
                                                     setEditPhone(user.phone || "");
                                                 }}
-                                                className="bg-orange-600 hover:bg-orange-700 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-all"
+                                                className="bg-orange-600 hover:bg-orange-700 text-white px-2.5 py-2 min-h-[44px] rounded-lg text-sm font-medium transition-all"
                                             >
                                                 Edit
                                             </button>
                                             <button
                                                 onClick={() => exportUser(user.id)}
-                                                className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-all"
+                                                className="bg-green-600 hover:bg-green-700 text-white px-2.5 py-2 min-h-[44px] rounded-lg text-sm font-medium transition-all"
                                             >
                                                 Export
                                             </button>
                                             <button
                                                 onClick={() => deleteUser(user.id)}
-                                                className="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-all"
+                                                className="bg-red-600 hover:bg-red-700 text-white px-2.5 py-2 min-h-[44px] rounded-lg text-sm font-medium transition-all"
                                             >
                                                 Delete
                                             </button>

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import axios from "axios";
+import API_URL from "../config";
 import { Send, MessageSquare, CheckCircle, XCircle, Clock, Trash2, Reply, KeyRound } from "lucide-react";
 
 function Requests() {

@@ -69,6 +69,60 @@ def build_expired_html(vehicle_number: str, owner: str, expiry_date: str, days_a
 </html>"""
 
 
+def build_password_reset_request_html(username: str) -> str:
+    return f"""<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="margin:0;padding:0;background:#f3f4f6;font-family:Arial,sans-serif">
+<table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:40px 20px">
+<table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08)">
+<tr><td style="background:linear-gradient(135deg,#7c3aed,#3b82f6);padding:40px;text-align:center">
+<h1 style="color:#ffffff;margin:0;font-size:24px">&#128272; Password Reset Request</h1>
+</td></tr>
+<tr><td style="padding:40px">
+<p style="color:#6b7280;font-size:14px;margin:0 0 20px">Hello Admin,</p>
+<p style="color:#374151;font-size:16px;margin:0 0 16px">A password reset request has been submitted by user <strong>{username}</strong>.</p>
+<div style="background:#f9fafb;border-radius:12px;padding:20px;margin:20px 0">
+<p style="color:#374151;font-size:14px;margin:0">Please log in to the admin panel and visit the <strong>Requests</strong> page to approve or reject this request.</p>
+</div>
+</td></tr>
+<tr><td style="background:#f9fafb;padding:24px 40px;text-align:center;border-top:1px solid #e5e7eb">
+<p style="color:#9ca3af;font-size:12px;margin:0">MV Tax &bull; Vehicle Tax Management Platform</p>
+</td></tr>
+</table>
+</td></tr></table>
+</body>
+</html>"""
+
+
+def build_password_reset_resolved_html(reset_link: str) -> str:
+    return f"""<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="margin:0;padding:0;background:#f3f4f6;font-family:Arial,sans-serif">
+<table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:40px 20px">
+<table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08)">
+<tr><td style="background:linear-gradient(135deg,#059669,#10b981);padding:40px;text-align:center">
+<h1 style="color:#ffffff;margin:0;font-size:24px">&#128274; Password Reset Approved</h1>
+</td></tr>
+<tr><td style="padding:40px">
+<p style="color:#6b7280;font-size:14px;margin:0 0 20px">Hello,</p>
+<p style="color:#374151;font-size:16px;margin:0 0 16px">Your password reset request has been approved.</p>
+<div style="background:#f9fafb;border-radius:12px;padding:20px;margin:20px 0;text-align:center">
+<a href="{reset_link}" style="display:inline-block;background:linear-gradient(135deg,#7c3aed,#3b82f6);color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:12px;font-size:16px;font-weight:bold">Reset Your Password</a>
+<p style="color:#9ca3af;font-size:12px;margin:16px 0 0">Or copy this link: <br>{reset_link}</p>
+</div>
+<p style="color:#ef4444;font-size:13px;margin:16px 0 0">This link expires once used.</p>
+</td></tr>
+<tr><td style="background:#f9fafb;padding:24px 40px;text-align:center;border-top:1px solid #e5e7eb">
+<p style="color:#9ca3af;font-size:12px;margin:0">MV Tax &bull; Vehicle Tax Management Platform</p>
+</td></tr>
+</table>
+</td></tr></table>
+</body>
+</html>"""
+
+
 def build_monthly_summary_html(username: str, data: dict) -> str:
     return f"""<!DOCTYPE html>
 <html>

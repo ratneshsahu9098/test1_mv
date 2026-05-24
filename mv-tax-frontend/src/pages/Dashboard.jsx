@@ -83,7 +83,7 @@ function Dashboard() {
   return (
     <div className="flex bg-gray-50 dark:bg-gray-950 min-h-screen">
       <Sidebar />
-      <div className="flex-1 min-h-screen">
+      <div className="flex-1 min-h-screen pl-16 lg:pl-0">
         <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-10 flex-wrap gap-4">
             <div>
@@ -159,7 +159,7 @@ function Dashboard() {
                           <Icon size={20} />
                         </div>
                       </div>
-                      <p className="text-4xl font-bold">{card.value}</p>
+                      <p className="text-3xl sm:text-4xl font-bold truncate">{card.value}</p>
                     </motion.div>
                   );
                 })}
@@ -194,7 +194,7 @@ function Dashboard() {
                               <Icon size={20} />
                             </div>
                           </div>
-                          <p className="text-4xl font-bold">{card.value}</p>
+                          <p className="text-3xl sm:text-4xl font-bold truncate">{card.value}</p>
                         </motion.div>
                       );
                     })}

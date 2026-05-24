@@ -276,7 +276,7 @@ const Sidebar = memo(function Sidebar() {
       <>
         <button
           onClick={() => setMobileOpen(true)}
-          className="fixed top-4 left-4 z-50 p-2.5 rounded-xl bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-400 shadow-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-all lg:hidden"
+          className="fixed top-4 left-4 z-50 p-3 rounded-xl bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-400 shadow-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-all lg:hidden"
           title="Open menu"
         >
           <Menu size={20} />

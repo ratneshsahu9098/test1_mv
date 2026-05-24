@@ -113,6 +113,17 @@ def update_request(req_id):
         "UPDATE requests SET status=%s, admin_response=%s, resolved_at=%s WHERE id=%s",
         (status or existing["status"], admin_response or existing["admin_response"], resolved_at, req_id),
     )
+
+    if is_password_reset and status == "resolved" and reset_link:
+        cur.execute("SELECT email FROM users WHERE username=%s", (existing["username"],))
+        user_row = cur.fetchone()
+        if user_row and user_row["email"]:
+            try:
+                from app.email_sender import send_password_reset_resolved_notification
+                send_password_reset_resolved_notification(user_row["email"], reset_link)
+            except Exception as e:
+                print(f"Failed to send reset link to user: {e}")
+
     conn.commit()
     conn.close()
 

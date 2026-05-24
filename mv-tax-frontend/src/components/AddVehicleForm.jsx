@@ -2,6 +2,7 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import axios from "axios";
 import API_URL from "../config";
+import CaptchaModal from "./CaptchaModal";
 
 function AddVehicleForm() {
   const [vehicleNumber, setVehicleNumber] = useState("");
@@ -12,6 +13,10 @@ function AddVehicleForm() {
   const [expiry, setExpiry] = useState("");
   const [stateName, setStateName] = useState("");
   const [adding, setAdding] = useState(false);
+  const [aiFetching, setAiFetching] = useState(false);
+  const [pendingFetch, setPendingFetch] = useState(null);
+  const [showCaptcha, setShowCaptcha] = useState(false);
+  const [captchaImage, setCaptchaImage] = useState(null);
 
   const addVehicle = async () => {
     if (!vehicleNumber || vehicleNumber.trim().length < 4) {
@@ -229,8 +234,23 @@ function AddVehicleForm() {
           >
             {adding ? "Adding..." : "Add Vehicle"}
           </button>
+          <button
+            onClick={startAiFetch}
+            disabled={aiFetching}
+            className="bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white px-6 py-3 rounded-xl font-semibold transition-all"
+          >
+            {aiFetching ? "AI Fetching..." : "AI Fetch"}
+          </button>
         </div>
       </div>
+
+      {showCaptcha && (
+        <CaptchaModal
+          captchaImage={captchaImage}
+          onSubmit={handleCaptchaSubmit}
+          onClose={() => setShowCaptcha(false)}
+        />
+      )}
     </>
   );
 }

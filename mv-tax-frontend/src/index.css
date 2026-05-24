@@ -8,12 +8,26 @@
   100% { background-position: 0% 50%; }
 }
 
+* { -webkit-tap-highlight-color: transparent; }
+
 html, body, #root {
   margin: 0;
   padding: 0;
   width: 100%;
   min-height: 100%;
   overflow-x: hidden;
+}
+
+button, a, select, input[type="checkbox"], input[type="radio"] {
+  touch-action: manipulation;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 

@@ -120,6 +120,7 @@ function Vehicles() {
           <CalendarX size={24} className="absolute top-4 right-4 text-white/20" />
           <p className="text-sm font-medium text-white/70">Expired Vehicles</p>
           <p className="text-4xl font-bold mt-2">{expiredVehicles.length}</p>
+          <p className="text-xs text-white/50 mt-1">Tap to filter</p>
         </div>
         <div
           onClick={() => setStatusFilter("Expiring Soon")}
@@ -128,14 +129,15 @@ function Vehicles() {
           <AlertTriangle size={24} className="absolute top-4 right-4 text-white/20" />
           <p className="text-sm font-medium text-white/70">Due Soon</p>
           <p className="text-4xl font-bold mt-2">{dueSoonVehicles.length}</p>
+          <p className="text-xs text-white/50 mt-1">Tap to filter</p>
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-4 mt-8 mb-6">
-        <div className="flex gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-8 mb-6">
+        <div className="flex gap-2 sm:gap-3 overflow-x-auto pb-1">
           <button
             onClick={() => setStatusFilter("All")}
-            className={`px-4 py-2 rounded-xl font-medium transition-all ${
+            className={`px-3 sm:px-4 py-2 min-h-[44px] rounded-xl font-medium transition-all whitespace-nowrap ${
               statusFilter === "All"
                 ? "bg-blue-500 text-white"
                 : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
@@ -145,25 +147,25 @@ function Vehicles() {
           </button>
           <button
             onClick={fetchVehicles}
-            className="bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-xl font-medium transition-all"
+            className="bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 px-3 sm:px-4 py-2 min-h-[44px] rounded-xl font-medium transition-all whitespace-nowrap"
           >
             Refresh
           </button>
           {statusFilter !== "All" && (
             <button
               onClick={() => setStatusFilter("All")}
-              className="bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-xl font-medium transition-all"
+              className="bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 px-3 sm:px-4 py-2 min-h-[44px] rounded-xl font-medium transition-all whitespace-nowrap"
             >
               Clear Filter
             </button>
           )}
         </div>
-        <div className="flex items-center gap-4">
-          <span className="bg-purple-600/20 text-purple-300 px-4 py-2 rounded-xl text-sm border border-purple-500/30">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <span className="bg-purple-600/20 text-purple-300 px-3 sm:px-4 py-2 rounded-xl text-sm border border-purple-500/30 whitespace-nowrap">
             Total: {filteredVehicles.length}
           </span>
           {statusFilter !== "All" && (
-            <span className="bg-blue-600/20 text-blue-300 px-4 py-2 rounded-xl text-sm border border-blue-500/30">
+            <span className="bg-blue-600/20 text-blue-300 px-3 sm:px-4 py-2 rounded-xl text-sm border border-blue-500/30 whitespace-nowrap">
               Filter: {statusFilter}
             </span>
           )}

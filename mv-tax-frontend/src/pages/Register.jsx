@@ -69,7 +69,7 @@ function Register() {
   };
 
   return (
-    <div className="relative w-screen min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 via-blue-50 to-indigo-100 dark:bg-[linear-gradient(-45deg,#0f172a,#1e1b4b,#1e3a8a,#3730a3)] dark:bg-[length:400%_400%] dark:animate-[gradient_15s_ease_infinite] overflow-hidden">
+    <div className="relative w-full min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 via-blue-50 to-indigo-100 dark:bg-[linear-gradient(-45deg,#0f172a,#1e1b4b,#1e3a8a,#3730a3)] dark:bg-[length:400%_400%] dark:animate-[gradient_15s_ease_infinite] overflow-hidden">
       <div className="absolute -top-40 -left-40 w-[50rem] h-[50rem] bg-cyan-500/10 rounded-full blur-3xl animate-[pulse_8s_ease-in-out_infinite]" />
       <div className="absolute -bottom-40 -right-40 w-[45rem] h-[45rem] bg-purple-600/20 rounded-full blur-3xl animate-[pulse_8s_ease-in-out_infinite_2s]" />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60rem] h-[60rem] bg-blue-600/5 rounded-full blur-3xl" />

@@ -35,7 +35,7 @@ function FetchModal({ isOpen, onClose, vehicleNumber, logs, loading, error }) {
             </div>
             <button
               onClick={onClose}
-              className="p-2 rounded-lg bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 transition-all"
+              className="p-3 rounded-lg bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 transition-all"
             >
               <X size={18} />
             </button>

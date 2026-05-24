@@ -80,8 +80,8 @@ function DeletedVehicles() {
             <tr className="border-b border-gray-200 dark:border-gray-800">
               <th className="p-3 text-left text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider">Vehicle</th>
               <th className="p-3 text-left text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider">Owner</th>
-              <th className="p-3 text-left text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider">Deleted By</th>
-              <th className="p-3 text-left text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider">Deleted At</th>
+              <th className="p-3 text-left text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider hidden sm:table-cell">Deleted By</th>
+              <th className="p-3 text-left text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider hidden md:table-cell">Deleted At</th>
               <th className="p-3 text-left text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
@@ -99,23 +99,23 @@ function DeletedVehicles() {
                 <tr key={vehicle.id} className="border-b border-gray-200 dark:border-gray-800/50 hover:bg-gray-100/30 dark:hover:bg-gray-800/30 transition-colors">
                   <td className="p-3 font-medium text-gray-900 dark:text-white">{vehicle.vehicle_number}</td>
                   <td className="p-3 text-gray-700 dark:text-gray-300">{vehicle.owner}</td>
-                  <td className="p-3 text-gray-500 dark:text-gray-400">{vehicle.deleted_by}</td>
-                  <td className="p-3 text-gray-500 dark:text-gray-400">{vehicle.deleted_at}</td>
+                  <td className="p-3 text-gray-500 dark:text-gray-400 hidden sm:table-cell">{vehicle.deleted_by}</td>
+                  <td className="p-3 text-gray-500 dark:text-gray-400 hidden md:table-cell">{vehicle.deleted_at}</td>
                     <td className="p-3">
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap">
                       {role === "admin" ? (
                         <>
                           <button
                             onClick={() => restoreVehicle(vehicle.id)}
                             disabled={actionId === vehicle.id}
-                            className="bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all"
+                            className="bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white px-4 py-2 min-h-[44px] rounded-lg text-sm font-medium transition-all"
                           >
                             {actionId === vehicle.id ? "Restoring..." : "Restore"}
                           </button>
                           <button
                             onClick={() => permanentDelete(vehicle.id)}
                             disabled={actionId === vehicle.id}
-                            className="bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all"
+                            className="bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white px-4 py-2 min-h-[44px] rounded-lg text-sm font-medium transition-all"
                           >
                             {actionId === vehicle.id ? "Deleting..." : "Delete Forever"}
                           </button>

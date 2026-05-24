@@ -33,7 +33,7 @@ function EditVehicleModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 backdrop-blur-sm">
-      <div className="bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-6 sm:p-8 rounded-2xl w-full max-w-lg mx-4 shadow-2xl">
+      <div className="bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-6 sm:p-8 rounded-2xl w-full max-w-lg mx-4 shadow-2xl max-h-[90vh] overflow-y-auto">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Edit Vehicle</h2>
 
         <div className="space-y-4">
