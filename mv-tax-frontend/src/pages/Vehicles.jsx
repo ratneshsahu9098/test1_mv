@@ -70,8 +70,8 @@ function Vehicles() {
   const filteredVehicles = useMemo(() =>
     vehicles.filter((vehicle) => {
       const matchesSearch =
-        vehicle.vehicle_number?.toLowerCase().includes(search.toLowerCase()) ||
-        vehicle.owner?.toLowerCase().includes(search.toLowerCase());
+        (vehicle.vehicle_number?.toLowerCase() || "").includes(search.toLowerCase()) ||
+        (vehicle.owner?.toLowerCase() || "").includes(search.toLowerCase());
       const matchesStatus =
         statusFilter === "All" || vehicle.status === statusFilter;
       return matchesSearch && matchesStatus;

@@ -39,11 +39,13 @@ function Login() {
 
       toast.success("Login successful");
       navigate("/");
-    } catch {
-      setError("Invalid username or password");
-      toast.error("Login failed");
+    } catch (error) {
+      const msg = error.response?.data?.error || "Login failed. Check your connection.";
+      setError(msg);
+      toast.error(msg);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => {

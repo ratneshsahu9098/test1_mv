@@ -192,7 +192,7 @@ function Requests() {
                         {req.title.toLowerCase().includes("password reset") && req.status === "resolved" && role !== "admin" && (
                           <button
                             onClick={() => {
-                              const match = req.admin_response.match(/token=([\w-]+)/);
+                              const match = (req.admin_response || "").match(/token=([\w-]+)/);
                               if (match) navigate(`/reset-password?token=${match[1]}`);
                             }}
                             className="mt-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2"

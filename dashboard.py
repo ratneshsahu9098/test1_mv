@@ -36,6 +36,22 @@ app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(days=7)
 
 jwt = JWTManager(app)
 
+# Security headers
+@app.after_request
+def add_security_headers(response):
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    return response
+
+
+# Health check
+@app.route("/api/health")
+def health_check():
+    return jsonify({"status": "healthy"})
+
+
 # Register Blueprints
 app.register_blueprint(auth_bp)
 app.register_blueprint(vehicles_bp)
@@ -266,7 +282,10 @@ conn.commit()
 conn.close()
 
 # Run auto-downgrade on startup (check for expired subs)
-auto_downgrade_expired()
+try:
+    auto_downgrade_expired()
+except Exception as e:
+    print(f"Auto-downgrade on startup failed: {e}")
 
 # -------------------------
 # DASHBOARD STATS API
@@ -446,15 +465,18 @@ def home():
     active_count = 0
 
     for vehicle in vehicles:
-        expiry = datetime.strptime(vehicle["expiry_date"], "%Y-%m-%d")
-        days_left = (expiry - today).days
+        try:
+            expiry = datetime.strptime(vehicle["expiry_date"], "%Y-%m-%d")
+            days_left = (expiry - today).days
 
-        if days_left < 0:
+            if days_left < 0:
+                expired_count += 1
+            elif days_left <= 7:
+                expiring_count += 1
+            else:
+                active_count += 1
+        except (ValueError, TypeError):
             expired_count += 1
-        elif days_left <= 7:
-            expiring_count += 1
-        else:
-            active_count += 1
 
     current_date = today.strftime("%Y-%m-%d")
     warning_date = (today + timedelta(days=7)).strftime("%Y-%m-%d")
@@ -583,4 +605,4 @@ def generate_report():
 # -------------------------
 
 if __name__ == "__main__":
-    app.run(debug=True, use_reloader=False, threaded=True)
+    app.run(debug=False, use_reloader=False, threaded=True)

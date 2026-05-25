@@ -120,6 +120,7 @@ function Users() {
             toast.success("Role Updated");
             fetchUsers();
         } catch (error) {
+            toast.error(error.response?.data?.error || "Failed to update role");
         }
     };
 
@@ -155,6 +156,8 @@ function Users() {
             link.setAttribute("download", `user_${id}.xlsx`);
             document.body.appendChild(link);
             link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
         } catch (error) {
             toast.error("Export failed");
         }
@@ -337,34 +340,18 @@ function Users() {
                                     </div>
                                 </td>
                                 <td className="p-3">
-                                    {user.username !== "admin" && (
-                                        <div className="flex gap-1.5 flex-wrap">
-                                            <button
-                                                onClick={() => {
-                                                    setEditUserId(user.id);
-                                                    setEditUsername(user.username);
-                                                    setEditPassword(user.password || "");
-                                                    setEditEmail(user.email || "");
-                                                    setEditPhone(user.phone || "");
-                                                }}
-                                                className="bg-orange-600 hover:bg-orange-700 text-white px-2.5 py-2 min-h-[44px] rounded-lg text-sm font-medium transition-all"
-                                            >
-                                                Edit
-                                            </button>
-                                            <button
-                                                onClick={() => exportUser(user.id)}
-                                                className="bg-green-600 hover:bg-green-700 text-white px-2.5 py-2 min-h-[44px] rounded-lg text-sm font-medium transition-all"
-                                            >
-                                                Export
-                                            </button>
-                                            <button
-                                                onClick={() => deleteUser(user.id)}
-                                                className="bg-red-600 hover:bg-red-700 text-white px-2.5 py-2 min-h-[44px] rounded-lg text-sm font-medium transition-all"
-                                            >
-                                                Delete
-                                            </button>
-                                        </div>
-                                    )}
+                                                    {user.username !== "admin" && (
+                                                        <select
+                                                            value={user.role}
+                                                            onChange={(e) => updateRole(user.id, e.target.value)}
+                                                            disabled={editingRole}
+                                                            className="bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-2 py-1.5 text-sm"
+                                                        >
+                                                            <option value="staff">Staff</option>
+                                                            <option value="viewer">Viewer</option>
+                                                            {user.role === "admin" && <option value="admin">Admin</option>}
+                                                        </select>
+                                                    )}
                                 </td>
                             </tr>
                         ))}

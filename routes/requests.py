@@ -13,6 +13,9 @@ def get_requests():
     username = get_jwt_identity()
     user = get_current_user(username)
 
+    if not user:
+        return jsonify({"error": "Unauthorized. Please login again."}), 401
+
     conn = get_db()
     cur = get_cursor(conn)
 
@@ -55,11 +58,13 @@ def create_request():
         return jsonify({"error": "Description is required"}), 400
 
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    user = get_current_user(username)
+    user_id = user["id"] if user else 0
     conn = get_db()
     cur = get_cursor(conn)
     cur.execute(
         "INSERT INTO requests (user_id, username, title, description, status, created_at) VALUES (%s, %s, %s, %s, 'pending', %s)",
-        (0, username, title, description, now),
+        (user_id, username, title, description, now),
     )
     conn.commit()
     conn.close()
@@ -73,10 +78,13 @@ def update_request(req_id):
     username = get_jwt_identity()
     user = get_current_user(username)
 
+    if not user:
+        return jsonify({"error": "Unauthorized. Please login again."}), 401
+
     if user["role"] != "admin":
         return jsonify({"error": "Admin access required"}), 403
 
-    data = request.get_json()
+    data = request.get_json() or {}
     status = data.get("status")
     admin_response = (data.get("admin_response") or "").strip()
 
@@ -135,6 +143,9 @@ def update_request(req_id):
 def delete_request(req_id):
     username = get_jwt_identity()
     user = get_current_user(username)
+
+    if not user:
+        return jsonify({"error": "Unauthorized. Please login again."}), 401
 
     if user["role"] != "admin":
         return jsonify({"error": "Admin access required"}), 403

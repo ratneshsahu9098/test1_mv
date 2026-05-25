@@ -9,8 +9,11 @@ load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL")
 UPLOAD_FOLDER = "uploads"
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
-RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID", "rzp_live_SteeAuz12ApySm")
+RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID")
 RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET")
+
+if not RAZORPAY_KEY_ID or not RAZORPAY_KEY_SECRET:
+    print("WARNING: RAZORPAY_KEY_ID or RAZORPAY_KEY_SECRET is not set. Payments will fail.")
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 

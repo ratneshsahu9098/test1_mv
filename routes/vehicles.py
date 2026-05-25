@@ -2,12 +2,14 @@ from datetime import datetime, timedelta
 import json
 import os
 import subprocess
+import threading
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from werkzeug.utils import secure_filename
 from helpers import UPLOAD_FOLDER, get_current_user, get_db, get_cursor
 
 FETCH_RUNNING = False
+FETCH_LOCK = threading.Lock()
 
 vehicles_bp = Blueprint("vehicles", __name__)
 
@@ -20,6 +22,10 @@ def api_get_vehicles():
     cur = get_cursor(conn)
     username = get_jwt_identity()
     user = get_current_user(username)
+
+    if not user:
+        conn.close()
+        return jsonify({"error": "Unauthorized. Please login again."}), 401
 
     if user["role"] == "admin":
         cur.execute("""
@@ -77,6 +83,10 @@ def add_vehicle_api():
     email = request.form.get("email", "")
     file = request.files.get("support_document")
     username = get_jwt_identity()
+    user = get_current_user(username)
+
+    if not user:
+        return jsonify({"error": "Unauthorized. Please login again."}), 401
 
     support_document = ""
     print(vehicle_number, expiry_date, phone, owner, chassis_last5, state_name, email)
@@ -127,10 +137,13 @@ def update_vehicle_api(id):
     username = get_jwt_identity()
     user = get_current_user(username)
 
+    if not user:
+        return jsonify({"error": "Unauthorized. Please login again."}), 401
+
     if user["role"] == "viewer":
         return jsonify({"error": "Viewer access denied"}), 403
 
-    data = request.get_json()
+    data = request.get_json() or {}
 
     conn = get_db()
     cur = get_cursor(conn)
@@ -142,12 +155,12 @@ def update_vehicle_api(id):
         conn.close()
         return jsonify({"error": "Vehicle not found"}), 404
 
-    vehicle_number = data.get("vehicle_number") or old_vehicle["vehicle_number"]
-    expiry_date = data.get("expiry") or old_vehicle["expiry_date"]
-    phone = data.get("phone") or old_vehicle["phone"]
-    owner = data.get("owner") or old_vehicle["owner"]
-    chassis_last5 = data.get("chassis_last5") or old_vehicle["chassis_last5"]
-    email = data.get("email") if data.get("email") is not None else old_vehicle.get("email", "")
+    vehicle_number = data.get("vehicle_number") if "vehicle_number" in data else old_vehicle["vehicle_number"]
+    expiry_date = data.get("expiry") if "expiry" in data else old_vehicle["expiry_date"]
+    phone = data.get("phone") if "phone" in data else old_vehicle["phone"]
+    owner = data.get("owner") if "owner" in data else old_vehicle["owner"]
+    chassis_last5 = data.get("chassis_last5") if "chassis_last5" in data else old_vehicle["chassis_last5"]
+    email = data.get("email") if "email" in data else old_vehicle.get("email", "")
     state_name = old_vehicle["state_name"]
     support_document = old_vehicle["support_document"]
 
@@ -187,6 +200,9 @@ def delete_vehicle_api(id):
 
     username = get_jwt_identity()
     user = get_current_user(username)
+
+    if not user:
+        return jsonify({"error": "Unauthorized. Please login again."}), 401
 
     if user["role"] != "admin":
         return jsonify({"error": "Admin access required"}), 403
@@ -232,6 +248,9 @@ def restore_vehicle(id):
     username = get_jwt_identity()
     user = get_current_user(username)
 
+    if not user:
+        return jsonify({"error": "Unauthorized. Please login again."}), 401
+
     if user["role"] != "admin":
         return jsonify({"error": "Admin access required"}), 403
 
@@ -273,8 +292,25 @@ def restore_vehicle(id):
 @jwt_required()
 def vehicle_history_api(id):
 
+    username = get_jwt_identity()
+    user = get_current_user(username)
+
+    if not user:
+        return jsonify({"error": "Unauthorized. Please login again."}), 401
+
     conn = get_db()
     cur = get_cursor(conn)
+
+    cur.execute("SELECT added_by FROM vehicles WHERE id=%s", (id,))
+    vehicle = cur.fetchone()
+
+    if not vehicle:
+        conn.close()
+        return jsonify({"error": "Vehicle not found"}), 404
+
+    if user["role"] != "admin" and vehicle["added_by"] != username:
+        conn.close()
+        return jsonify({"error": "Access denied"}), 403
 
     cur.execute(
         """
@@ -314,37 +350,37 @@ def fetch_vehicle_info(vehicle_number):
     username = get_jwt_identity()
     user = get_current_user(username)
 
+    if not user:
+        return jsonify({"error": "Unauthorized. Please login again."}), 401
+
     if user["role"] == "viewer":
-        FETCH_RUNNING = False
         return jsonify({"error": "Viewer access denied"}), 403
 
-    if FETCH_RUNNING:
-        return jsonify({"error": "Fetch already running"}), 429
-
-    FETCH_RUNNING = True
-
-    conn = get_db()
-    cur = get_cursor(conn)
-
-    cur.execute(
-        """
-        SELECT chassis_last5
-        FROM vehicles
-        WHERE vehicle_number=%s
-        """,
-        (vehicle_number,),
-    )
-
-    row = cur.fetchone()
-    conn.close()
-
-    if not row:
-        FETCH_RUNNING = False
-        return jsonify({"error": "Vehicle not found"}), 404
-
-    chassis_last5 = row["chassis_last5"]
+    with FETCH_LOCK:
+        if FETCH_RUNNING:
+            return jsonify({"error": "Fetch already running"}), 429
+        FETCH_RUNNING = True
 
     try:
+        conn = get_db()
+        cur = get_cursor(conn)
+
+        cur.execute(
+            """
+            SELECT chassis_last5
+            FROM vehicles
+            WHERE vehicle_number=%s
+            """,
+            (vehicle_number,),
+        )
+
+        row = cur.fetchone()
+        conn.close()
+
+        if not row:
+            return jsonify({"error": "Vehicle not found"}), 404
+
+        chassis_last5 = row["chassis_last5"]
 
         result = subprocess.run(
             ["python", "fetch_vehicle.py", vehicle_number, chassis_last5],
@@ -367,20 +403,17 @@ def fetch_vehicle_info(vehicle_number):
                 break
 
         if not json_line:
-            FETCH_RUNNING = False
             return jsonify({"error": "JSON output not found", "output": result.stdout, "stderr": result.stderr}), 500
 
         data = json.loads(json_line)
 
         if data.get("challan_pending"):
-            FETCH_RUNNING = False
             return jsonify({"error": data.get("error", "Pending challans"), "challan_pending": True, "output": result.stdout}), 400
 
         tax_upto = data.get("tax_upto")
         owner_name = data.get("owner_name")
 
         if not tax_upto:
-            FETCH_RUNNING = False
             return jsonify({"error": "Tax extraction failed", "output": result.stdout}), 500
 
         tax_upto = datetime.strptime(tax_upto, "%d-%b-%Y").strftime("%Y-%m-%d")
@@ -402,16 +435,19 @@ def fetch_vehicle_info(vehicle_number):
 
         print(f"Updated DB: {tax_upto}")
 
-        FETCH_RUNNING = False
-
         return jsonify(
             {"vehicle": vehicle_number, "output": result.stdout, "error": result.stderr}
         )
 
     except subprocess.TimeoutExpired as e:
-
-        FETCH_RUNNING = False
         return jsonify({"error": "Fetch timed out", "output": e.output or ""}), 408
+
+    except Exception as e:
+        return jsonify({"error": f"Fetch failed: {str(e)}"}), 500
+
+    finally:
+        with FETCH_LOCK:
+            FETCH_RUNNING = False
 
 
 @vehicles_bp.route("/api/deleted_vehicles", methods=["GET"])
@@ -461,6 +497,9 @@ def permanent_delete_vehicle(id):
 
     username = get_jwt_identity()
     user = get_current_user(username)
+
+    if not user:
+        return jsonify({"error": "Unauthorized. Please login again."}), 401
 
     if user["role"] != "admin":
         return jsonify({"error": "Admin access required"}), 403

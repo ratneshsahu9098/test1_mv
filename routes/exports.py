@@ -13,6 +13,9 @@ def export_users():
     username = get_jwt_identity()
     user = get_current_user(username)
 
+    if not user:
+        return jsonify({"error": "Unauthorized. Please login again."}), 401
+
     if user["role"] != "admin":
         return jsonify({"error": "Admin access required"}), 403
 

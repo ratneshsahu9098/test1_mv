@@ -11,6 +11,8 @@ auth_bp = Blueprint("auth", __name__)
 def api_login():
 
     data = request.get_json()
+    if not data:
+        return jsonify({"error": "Invalid request body"}), 400
     login_input = data.get("username")
     password = data.get("password")
 
@@ -76,6 +78,8 @@ def api_login():
 def register():
 
     data = request.get_json()
+    if not data:
+        return jsonify({"error": "Invalid request body"}), 400
     username = data.get("username")
     email = data.get("email")
     phone = data.get("phone")
@@ -86,7 +90,7 @@ def register():
         return jsonify({"error": "Username and password required"}), 400
     if len(password) < 6:
         return jsonify({"error": "Password must be at least 6 characters"}), 400
-    if not phone.isdigit() or len(phone) != 10:
+    if not phone or not phone.isdigit() or len(phone) != 10:
         return jsonify({"error": "Invalid phone number"}), 400
 
     if not email:
@@ -303,12 +307,34 @@ def change_password():
 
     username = get_jwt_identity()
     user = get_current_user(username)
+
+    if not user:
+        return jsonify({"error": "Unauthorized. Please login again."}), 401
+
     data = request.get_json()
+    if not data:
+        return jsonify({"error": "Invalid request body"}), 400
+
+    current_password = data.get("current_password")
     new_password = data.get("new_password")
-    hashed_password = bcrypt.hashpw(new_password.encode(), bcrypt.gensalt()).decode()
+
+    if not current_password or not new_password:
+        return jsonify({"error": "Current and new password are required"}), 400
+
+    if len(new_password) < 6:
+        return jsonify({"error": "Password must be at least 6 characters"}), 400
 
     conn = get_db()
     cur = get_cursor(conn)
+
+    cur.execute("SELECT password FROM users WHERE username=%s", (username,))
+    row = cur.fetchone()
+
+    if not row or not bcrypt.checkpw(current_password.encode(), row["password"].encode()):
+        conn.close()
+        return jsonify({"error": "Current password is incorrect"}), 403
+
+    hashed_password = bcrypt.hashpw(new_password.encode(), bcrypt.gensalt()).decode()
 
     cur.execute(
         """
@@ -316,7 +342,7 @@ def change_password():
         SET password=%s
         WHERE username=%s
     """,
-        (hashed_password, user["username"]),
+        (hashed_password, username),
     )
 
     conn.commit()
@@ -330,7 +356,7 @@ def change_password():
 def update_profile():
 
     current_username = get_jwt_identity()
-    data = request.get_json()
+    data = request.get_json() or {}
     email = data.get("email")
     phone = data.get("phone")
     new_username = data.get("username")

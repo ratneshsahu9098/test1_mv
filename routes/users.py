@@ -24,9 +24,14 @@ def get_users():
     cur = get_cursor(conn)
 
     cur.execute("""
-        SELECT id, username, email, phone, role,
-               subscription_status, subscription_expiry
-        FROM users
+        SELECT u.id, u.username, u.email, u.phone, u.role,
+               u.subscription_status, u.subscription_expiry,
+               COUNT(v.id) AS vehicle_count
+        FROM users u
+        LEFT JOIN vehicles v ON v.added_by = u.username
+        GROUP BY u.id, u.username, u.email, u.phone, u.role,
+                 u.subscription_status, u.subscription_expiry
+        ORDER BY u.id
     """)
 
     rows = cur.fetchall()
@@ -34,9 +39,6 @@ def get_users():
     users = []
 
     for row in rows:
-        cur.execute("SELECT COUNT(*) FROM vehicles WHERE added_by=%s", (row["username"],))
-        vehicle_count = cur.fetchone()["count"]
-
         users.append(
             {
                 "id": row["id"],
@@ -46,7 +48,7 @@ def get_users():
                 "role": row["role"],
                 "subscription_status": row["subscription_status"],
                 "subscription_expiry": row["subscription_expiry"],
-                "vehicle_count": vehicle_count,
+                "vehicle_count": row["vehicle_count"],
             }
         )
 
