@@ -84,7 +84,7 @@ function Plans() {
       }
 
       const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_Ss14DV2TS3MjuD",
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_live_SteeAuz12ApySm",
         amount: order.amount,
         currency: order.currency,
         name: "MV Tax",

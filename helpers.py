@@ -9,7 +9,7 @@ load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL")
 UPLOAD_FOLDER = "uploads"
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
-RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID", "rzp_test_Ss14DV2TS3MjuD")
+RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID", "rzp_live_SteeAuz12ApySm")
 RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET")
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
