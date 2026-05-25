@@ -89,6 +89,9 @@ def register():
     if not phone.isdigit() or len(phone) != 10:
         return jsonify({"error": "Invalid phone number"}), 400
 
+    if not email:
+        email = None
+
     conn = get_db()
     cur = get_cursor(conn)
 
@@ -124,19 +127,37 @@ def register():
         conn.close()
         return jsonify({"error": "Phone number already exists"}), 409
 
-    cur.execute(
-        """
-    INSERT INTO users (
-        username,
-        email,
-        phone,
-        password,
-        role
-    )
-    VALUES (%s, %s, %s, %s, %s)
-    """,
-        (username, email, phone, hashed_password, role),
-    )
+    if email:
+        cur.execute(
+            """
+            SELECT id
+            FROM users
+            WHERE email=%s
+            """,
+            (email,),
+        )
+        existing_email = cur.fetchone()
+        if existing_email:
+            conn.close()
+            return jsonify({"error": "Email already exists"}), 409
+
+    try:
+        cur.execute(
+            """
+        INSERT INTO users (
+            username,
+            email,
+            phone,
+            password,
+            role
+        )
+        VALUES (%s, %s, %s, %s, %s)
+        """,
+            (username, email, phone, hashed_password, role),
+        )
+    except Exception as e:
+        conn.close()
+        return jsonify({"error": f"Registration failed: {str(e)}"}), 500
 
     conn.commit()
     conn.close()

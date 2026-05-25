@@ -268,7 +268,7 @@ function Users() {
                             <th className="p-3 text-left text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider hidden lg:table-cell">Expiry</th>
                             <th className="p-3 text-left text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider hidden sm:table-cell">Status</th>
                             <th className="p-3 text-left text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider hidden md:table-cell">Role Control</th>
-                            <th className="p-3 text-left text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider hidden lg:table-cell">Subscription</th>
+                            <th className="p-3 text-left text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider">Subscription</th>
                             <th className="p-3 text-left text-gray-500 dark:text-gray-400 font-medium text-sm uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
@@ -311,7 +311,7 @@ function Users() {
                                         <option value="viewer">Viewer</option>
                                     </select>
                                 </td>
-                                <td className="p-3 hidden lg:table-cell">
+                                <td className="p-3">
                                     <div className="flex gap-2 flex-wrap">
                                         <button
                                             disabled={user.username === "admin"}
