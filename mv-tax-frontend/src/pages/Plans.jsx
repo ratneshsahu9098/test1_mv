@@ -8,6 +8,21 @@ import API_URL from "../config";
 
 const API = API_URL;
 
+function loadRazorpayScript() {
+  return new Promise((resolve, reject) => {
+    if (window.Razorpay) {
+      resolve();
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error("Failed to load Razorpay SDK"));
+    document.body.appendChild(script);
+  });
+}
+
 const plans = [
   {
     name: "Free",
@@ -79,6 +94,16 @@ function Plans() {
 
       if (!order.id) {
         toast.error(order.error || "Failed to create order");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        await loadRazorpayScript();
+      } catch {
+        toast.error(
+          "Razorpay is blocked by your browser. Please disable ad blocker or tracking protection for this site, or use Chrome/Edge."
+        );
         setLoading(false);
         return;
       }
