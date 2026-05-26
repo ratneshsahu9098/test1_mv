@@ -13,3 +13,4 @@ reportlab
 python-docx
 firebase-admin
 psycopg2-binary
+playwright

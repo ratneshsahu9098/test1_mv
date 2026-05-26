@@ -1,8 +1,17 @@
-from playwright.sync_api import sync_playwright
 import json
 import sys
 import time
 import os
+
+try:
+    from playwright.sync_api import sync_playwright
+except ImportError:
+    result = {
+        "success": False,
+        "error": "Playwright is not installed. Run: pip install playwright && playwright install chromium",
+    }
+    print(json.dumps(result))
+    sys.exit(1)
 
 VEHICLE_NUMBER = sys.argv[1]
 CHASSIS_LAST5 = sys.argv[2]
