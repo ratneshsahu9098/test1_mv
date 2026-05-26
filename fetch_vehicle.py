@@ -131,8 +131,14 @@ with sync_playwright() as p:
             or page.locator("iframe").count() > 0
         )
         if captcha_detected:
-            print("CAPTCHA_DETECTED")
+            result = {
+                "success": False,
+                "vehicle_number": VEHICLE_NUMBER,
+                "error": "CAPTCHA detected — manual intervention required",
+            }
+            print(json.dumps(result))
             page.screenshot(path=os.path.join(SCREENSHOT_DIR, "captcha.png"), full_page=True)
+            context.close()
             browser.close()
             sys.exit(0)
 
@@ -287,15 +293,17 @@ with sync_playwright() as p:
 
     except Exception as e:
         import traceback
-        print("ERROR:")
-        print(e)
+        error_result = {
+            "success": False,
+            "vehicle_number": VEHICLE_NUMBER,
+            "error": f"{type(e).__name__}: {str(e)}",
+        }
+        print(json.dumps(error_result))
         traceback.print_exc()
-        print(f"Error type: {type(e).__name__}")
         try:
             page.screenshot(path=os.path.join(SCREENSHOT_DIR, "error.png"), full_page=True)
-            print("Error screenshot saved")
         except Exception:
-            print("Screenshot failed")
+            pass
 
     context.close()
     browser.close()

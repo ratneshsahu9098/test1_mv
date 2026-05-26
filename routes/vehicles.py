@@ -390,8 +390,8 @@ def fetch_vehicle_info(vehicle_number):
         )
 
         print(result.stdout)
-        output = result.stdout.strip()
-        print(output)
+        print(result.stderr)
+        output = (result.stdout + "\n" + result.stderr).strip()
         lines = output.splitlines()
 
         json_line = None
@@ -403,9 +403,15 @@ def fetch_vehicle_info(vehicle_number):
                 break
 
         if not json_line:
-            return jsonify({"error": "JSON output not found", "output": result.stdout, "stderr": result.stderr}), 500
+            return jsonify({
+                "error": "Unable to fetch vehicle info. Parivahan may be blocked or require CAPTCHA.",
+                "detail": result.stdout[:1000] if result.stdout else result.stderr[:1000],
+            }), 500
 
         data = json.loads(json_line)
+
+        if not data.get("success"):
+            return jsonify({"error": data.get("error", "Fetch failed"), "output": result.stdout}), 400
 
         if data.get("challan_pending"):
             return jsonify({"error": data.get("error", "Pending challans"), "challan_pending": True, "output": result.stdout}), 400
